@@ -1,0 +1,1483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UpLabs BD Intelligence Dashboard</title>
+<style>
+  :root { color-scheme: light;
+    /* UP.Labs brand: black + white + signature green (derived from up.partners public assets) */
+    --navy:#0e1116; --navy-2:#1e242d; --ink:#161a20; --muted:#5b6470;
+    --bg:#f5f6f8; --card:#ffffff; --line:#e4e7ec; --amber:#b45309; --amber-bg:#fef3c7;
+    --acc:#14a656; --acc-bright:#2ee06f; --acc-bg:#e7f8ee;
+    --green:#166534; --green-bg:#dcfce7; --red:#b91c1c; --red-bg:#fee2e2; --blue-bg:#eef1f5;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; background:var(--bg); color:var(--ink); line-height:1.6; -webkit-font-smoothing:antialiased; }
+  @keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes popIn { from { opacity:0; transform:translateY(-6px) scale(.96); } to { opacity:1; transform:none; } }
+  .card.anim { animation:fadeUp .5s cubic-bezier(.22,.9,.3,1) both; }
+  .view-anim > * { animation:fadeUp .5s cubic-bezier(.22,.9,.3,1) both; }
+  .view-anim > *:nth-child(1){animation-delay:0ms} .view-anim > *:nth-child(2){animation-delay:60ms}
+  .view-anim > *:nth-child(3){animation-delay:120ms} .view-anim > *:nth-child(4){animation-delay:175ms}
+  .view-anim > *:nth-child(5){animation-delay:230ms} .view-anim > *:nth-child(6){animation-delay:285ms}
+  .view-anim > *:nth-child(7){animation-delay:335ms} .view-anim > *:nth-child(n+8){animation-delay:380ms}
+  .hero { animation:fadeUp .5s cubic-bezier(.22,.9,.3,1) both; }
+  @media (prefers-reduced-motion: reduce) { * { animation:none !important; transition:none !important; } }
+  .wrap { max-width:1080px; margin:0 auto; padding:24px 20px 60px; }
+  /* HEADER */
+  .hero { position:relative; z-index:70; background:linear-gradient(135deg,#0b0e12 0%,#1a2026 100%); color:#fff; border-radius:18px; padding:34px 36px; margin-bottom:24px; box-shadow:0 14px 40px rgba(10,14,18,.25); border-top:3px solid var(--acc-bright); }
+  .brandmark { font-weight:900; font-size:19px; letter-spacing:-.02em; color:#fff; white-space:nowrap; user-select:none; }
+  .brandmark span { color:var(--acc-bright); }
+  .hero-right { display:flex; align-items:center; gap:16px; flex:none; }
+  .hero h1 { font-size:27px; font-weight:800; letter-spacing:-.035em; }
+  .hero p { margin-top:8px; font-size:13.5px; opacity:.82; max-width:720px; line-height:1.65; }
+  .stats { display:flex; gap:14px; margin-top:16px; flex-wrap:wrap; }
+  .stat { background:rgba(255,255,255,.12); border-radius:11px; padding:9px 18px; font-size:12px; letter-spacing:.02em; }
+  .stat b { display:block; font-size:21px; font-weight:800; letter-spacing:-.02em; font-variant-numeric:tabular-nums; }
+  /* SECTOR SECTIONS */
+  .sector { margin:26px 0 10px; }
+  .sector { margin:34px 0 10px; }
+  .sector h2 { font-size:11.5px; text-transform:uppercase; letter-spacing:.14em; font-weight:700; color:var(--muted); border-bottom:2px solid var(--line); padding-bottom:8px; margin-bottom:16px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(310px,1fr)); gap:16px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:15px; padding:20px 20px 17px; cursor:pointer; transition:box-shadow .2s ease, transform .2s ease, border-color .2s ease; position:relative; }
+  .card:hover { box-shadow:0 12px 32px rgba(31,56,100,.11); transform:translateY(-3px); border-color:#c7d3e8; }
+  .card .top { display:flex; justify-content:space-between; align-items:flex-start; gap:8px; }
+  .card h3 { font-size:16.5px; font-weight:750; letter-spacing:-.015em; color:var(--navy); }
+  .card .rev { font-size:12px; color:var(--muted); white-space:nowrap; }
+  .card .desc { font-size:13px; color:var(--muted); margin-top:7px; min-height:38px; }
+  .badges { margin-top:10px; display:flex; gap:6px; flex-wrap:wrap; }
+  .chip { font-size:10.5px; font-weight:600; padding:3px 9px; border-radius:99px; }
+  .chip.deep { background:var(--green-bg); color:var(--green); }
+  .chip.lead { background:var(--red-bg); color:var(--red); }
+  .chip.sec  { background:var(--blue-bg); color:var(--navy); }
+  .chip.hot  { background:var(--amber-bg); color:var(--amber); }
+  .cta { margin-top:10px; font-size:12px; font-weight:600; color:var(--navy); }
+  /* DETAIL */
+  .back { display:inline-flex; align-items:center; gap:6px; background:var(--card); border:1px solid var(--line); border-radius:9px; padding:8px 16px; font-size:13px; font-weight:600; color:var(--navy); cursor:pointer; margin-bottom:16px; transition:background .15s ease, transform .15s ease, border-color .15s ease; }
+  .back:hover { background:var(--blue-bg); transform:translateX(-3px); border-color:#c7d3e8; }
+  .dhead { background:linear-gradient(135deg,#0b0e12 0%,#1a2026 100%); color:#fff; border-radius:18px; padding:32px 34px; box-shadow:0 14px 40px rgba(10,14,18,.25); border-top:3px solid var(--acc-bright); }
+  .dhead h1 { font-size:31px; font-weight:800; letter-spacing:-.035em; }
+  .dhead .meta { margin-top:8px; font-size:13px; opacity:.85; display:flex; gap:18px; flex-wrap:wrap; }
+  .dhead .angle { margin-top:14px; background:rgba(255,255,255,.13); border-left:3px solid var(--acc-bright); border-radius:0 9px 9px 0; padding:10px 14px; font-size:13.5px; }
+  .dh-top { display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+  .idchips { display:flex; gap:6px; flex-wrap:wrap; }
+  .idchip { font-size:11px; font-weight:700; letter-spacing:.04em; padding:4px 10px; border-radius:99px; background:rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.22); }
+  .idchip.pub { color:var(--acc-bright); border-color:rgba(46,224,111,.4); }
+  .idchip.priv { color:#fbbf24; border-color:rgba(251,191,36,.4); }
+  .statstrip { display:flex; gap:10px; flex-wrap:wrap; margin-top:16px; }
+  .fs { background:rgba(255,255,255,.10); border:1px solid rgba(255,255,255,.12); border-radius:10px; padding:8px 14px; min-width:96px; }
+  .fs .l { font-size:9.5px; text-transform:uppercase; letter-spacing:.12em; opacity:.62; }
+  .fs .v { font-size:14.5px; font-weight:700; margin-top:2px; font-variant-numeric:tabular-nums; }
+  .panel { background:var(--card); border:1px solid var(--line); border-radius:15px; padding:24px 26px; margin-top:18px; box-shadow:0 2px 10px rgba(31,56,100,.04); }
+  .panel h2 { font-size:11.5px; text-transform:uppercase; letter-spacing:.13em; font-weight:700; color:var(--acc); margin-bottom:12px; }
+  .panel p { font-size:14px; margin-bottom:9px; }
+  .panel p:last-child { margin-bottom:0; }
+  .ev { border:1px solid var(--line); border-left:3px solid var(--navy); border-radius:0 9px 9px 0; padding:12px 15px; margin-bottom:11px; background:#fafbfd; }
+  .ev .src { font-size:11.5px; font-weight:700; color:var(--navy); text-transform:uppercase; letter-spacing:.04em; }
+  .ev .q { font-size:13.5px; margin-top:5px; }
+  .ev .why { font-size:12.5px; color:var(--acc); margin-top:6px; font-weight:600; }
+  .ev a { font-size:12px; color:var(--navy-2); }
+  .venture { background:var(--green-bg); border:1px solid #bbe6c8; border-radius:15px; padding:24px 26px; margin-top:18px; }
+  .venture h2 { font-size:11.5px; text-transform:uppercase; letter-spacing:.13em; font-weight:700; color:var(--green); margin-bottom:12px; }
+  .venture .vname { font-size:16px; font-weight:700; color:var(--green); margin-bottom:7px; }
+  .venture p { font-size:14px; }
+  .steps { list-style:none; }
+  .steps li { display:flex; gap:12px; margin-bottom:12px; font-size:14px; }
+  .steps .n { flex:none; width:24px; height:24px; border-radius:50%; background:var(--navy); color:#fff; font-size:12px; font-weight:700; display:flex; align-items:center; justify-content:center; margin-top:1px; }
+  .people { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:10px; }
+  .person { border:1px solid var(--line); border-radius:9px; padding:12px 14px; }
+  .person b { font-size:13.5px; color:var(--navy); }
+  .person .t { font-size:12px; color:var(--muted); }
+  .person .w { font-size:12.5px; margin-top:5px; }
+  .note { font-size:11.5px; color:var(--muted); margin-top:18px; text-align:center; }
+  .hidden { display:none !important; }
+  /* ADD-COMPANY BUTTON + MODAL */
+  .hero-top { display:flex; justify-content:space-between; align-items:flex-start; gap:14px; }
+  .addbtn { flex:none; background:rgba(255,255,255,.14); color:#fff; border:1px solid rgba(255,255,255,.35); border-radius:99px; padding:7px 14px; font-size:12.5px; font-weight:600; cursor:pointer; transition:background .12s; }
+  .addbtn:hover { background:rgba(255,255,255,.26); }
+  .modal-head { display:flex; justify-content:space-between; align-items:flex-start; gap:10px; }
+  .xbtn { flex:none; background:var(--bg); border:1px solid var(--line); color:var(--muted); border-radius:8px; width:30px; height:30px; font-size:16px; line-height:1; cursor:pointer; }
+  .xbtn:hover { background:var(--red-bg); color:var(--red); border-color:#f3c1c1; }
+  .add-wrap { position:relative; flex:none; }
+  .dropdown { position:absolute; top:calc(100% + 8px); right:0; width:min(520px, calc(100vw - 48px)); background:#fff; color:var(--ink); border:1px solid var(--line); border-radius:14px; padding:18px 20px; box-shadow:0 18px 50px rgba(15,23,42,.28); z-index:60; text-align:left; transform-origin:top right; animation:popIn .22s cubic-bezier(.2,.7,.3,1) both; }
+  .dropdown h3 { font-size:16px; color:var(--navy); }
+  .dropdown .sub { font-size:12.5px; color:var(--muted); margin:4px 0 12px; }
+  .dropdown input[type=text] { width:100%; border:1.5px solid var(--line); border-radius:9px; padding:11px 13px; font-size:14px; outline:none; box-sizing:border-box; }
+  .dropdown input[type=text]:focus { border-color:var(--navy); }
+  .results { max-height:280px; overflow-y:auto; margin-top:8px; }
+  .res { display:flex; justify-content:space-between; align-items:center; gap:10px; padding:10px 12px; border-radius:8px; cursor:pointer; border:1px solid transparent; transition:background .12s ease; }
+  .res:hover { background:var(--blue-bg); }
+  .res.dis { opacity:.5; cursor:default; }
+  .res.dis:hover { background:none; }
+  .res b { font-size:13.5px; color:var(--ink); }
+  .res .tick { font-size:11px; color:var(--muted); }
+  .res .tag { font-size:10.5px; font-weight:600; padding:2px 8px; border-radius:99px; background:var(--green-bg); color:var(--green); white-space:nowrap; }
+  .confirm-box { border:1px solid var(--line); border-radius:10px; padding:14px 16px; margin-top:12px; background:#fafbfd; }
+  .confirm-box b { color:var(--navy); font-size:15px; }
+  .confirm-box .meta2 { font-size:12.5px; color:var(--muted); margin:3px 0 12px; }
+  .btnrow { display:flex; gap:10px; }
+  .gobtn { background:var(--navy); color:#fff; border:none; border-radius:8px; padding:10px 18px; font-size:13px; font-weight:700; cursor:pointer; }
+  .gobtn:hover { background:var(--navy-2); }
+  .cancelbtn { background:#fff; color:var(--muted); border:1px solid var(--line); border-radius:8px; padding:10px 16px; font-size:13px; cursor:pointer; }
+  .status-ok { background:var(--green-bg); border:1px solid #bbe6c8; color:var(--green); border-radius:9px; padding:12px 14px; font-size:13px; margin-top:12px; }
+  .status-copy { background:var(--amber-bg); border:1px solid #f5d78e; color:var(--amber); border-radius:9px; padding:12px 14px; font-size:13px; margin-top:12px; }
+  /* SEARCH + FILTERS + PIPELINE STATUS */
+  .toolbar { display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin:18px 0 4px; }
+  .toolbar input { flex:1; min-width:220px; border:1.5px solid var(--line); border-radius:9px; padding:9px 12px; font-size:13.5px; outline:none; background:#fff; }
+  .toolbar input:focus { border-color:var(--navy); }
+  .chips-row { display:flex; gap:6px; flex-wrap:wrap; }
+  .fchip { font-size:11.5px; font-weight:600; padding:5px 11px; border-radius:99px; border:1px solid var(--line); background:#fff; color:var(--muted); cursor:pointer; transition:all .15s ease; }
+  .fchip:hover { border-color:var(--navy); color:var(--navy); }
+  .fchip.on { background:var(--navy); color:#fff; border-color:var(--navy); }
+  .stchip { cursor:pointer; }
+  .st-none { background:#eef1f5; color:#5b677a; }
+  .st-out  { background:#e0ecff; color:#1d4ed8; }
+  .st-meet { background:var(--green-bg); color:var(--green); }
+  .st-pass { background:#f3f4f6; color:#9ca3af; text-decoration:line-through; }
+  .stbtns { display:flex; gap:8px; flex-wrap:wrap; }
+  .stbtn { border:1px solid var(--line); background:#fff; border-radius:99px; padding:7px 14px; font-size:12.5px; font-weight:600; color:var(--muted); cursor:pointer; transition:all .15s ease; }
+  .stbtn:hover { border-color:var(--navy); color:var(--navy); }
+  .stbtn.on { border-color:transparent; color:#fff; }
+  .stbtn.on.st-none { background:#5b677a; }
+  .stbtn.on.st-out  { background:#1d4ed8; }
+  .stbtn.on.st-meet { background:var(--green); }
+  .stbtn.on.st-pass { background:#9ca3af; text-decoration:none; }
+  .nomatch { text-align:center; color:var(--muted); font-size:13.5px; padding:40px 0; }
+
+/* ============ v2 ADDITIONS: C-suite, calendar, regions ============ */
+.navtabs { display:flex; gap:8px; margin:18px 0 4px; flex-wrap:wrap; }
+.navtab { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:9px 18px;
+  font-size:13px; font-weight:600; color:var(--muted); cursor:pointer; transition:all .15s; }
+.navtab:hover { border-color:var(--navy-2); color:var(--navy); }
+.navtab.on { background:var(--navy); border-color:var(--navy); color:#fff; }
+
+/* --- C-suite --- */
+.csuite { display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:12px; margin-top:4px; }
+.slot { border:1px solid var(--line); border-radius:11px; padding:14px 15px; background:var(--card); position:relative; }
+.slot.filled { border-left:3px solid var(--navy); }
+.slot.empty { border-style:dashed; background:#fafbfd; }
+.slot .rl { font-size:10.5px; font-weight:800; letter-spacing:.12em; color:var(--muted); text-transform:uppercase; }
+.slot .nm { font-size:15px; font-weight:700; color:var(--navy); margin-top:5px; }
+.slot .ti { font-size:12.5px; color:var(--ink); margin-top:2px; }
+.slot .bg { font-size:12.5px; color:var(--muted); margin-top:7px; line-height:1.5; }
+.slot .since { display:inline-block; font-size:10.5px; font-weight:700; background:var(--blue-bg); color:var(--navy);
+  padding:2px 8px; border-radius:99px; margin-top:8px; }
+.slot .none { font-size:13px; color:var(--muted); margin-top:6px; font-style:italic; }
+.liwrap { margin-top:10px; }
+.libtn { display:inline-flex; align-items:center; gap:6px; font-size:11.5px; font-weight:700; text-decoration:none;
+  background:#0a66c2; color:#fff; padding:5px 11px; border-radius:7px; }
+.libtn:hover { background:#004182; }
+.libtn .lin { font-weight:900; font-size:12px; }
+.conf { position:absolute; top:12px; right:13px; font-size:9.5px; font-weight:800; letter-spacing:.06em;
+  padding:2px 7px; border-radius:99px; text-transform:uppercase; }
+.conf.high { background:var(--green-bg); color:var(--green); }
+.conf.med { background:var(--amber-bg); color:var(--amber); }
+.conf.check { background:var(--red-bg); color:var(--red); }
+.gapnote { margin-top:12px; padding:12px 14px; background:#fbfcfe; border:1px dashed var(--line);
+  border-radius:10px; font-size:13px; color:var(--ink); line-height:1.55; }
+.gapnote b { color:var(--navy); }
+.srcline { margin-top:10px; font-size:11.5px; color:var(--muted); }
+.srcline a { color:var(--navy); }
+.liexplain { font-size:12px; color:var(--muted); margin-top:10px; line-height:1.5; }
+
+/* --- events --- */
+.evrow { display:flex; gap:14px; border:1px solid var(--line); border-radius:11px; padding:14px 16px;
+  background:var(--card); margin-bottom:10px; align-items:flex-start; }
+.evdate { flex:0 0 92px; text-align:center; border-right:1px solid var(--line); padding-right:12px; }
+.evdate .mo { font-size:10.5px; font-weight:800; letter-spacing:.1em; color:var(--red); text-transform:uppercase; }
+.evdate .dy { font-size:23px; font-weight:800; color:var(--navy); line-height:1.1; }
+.evdate .yr { font-size:11px; color:var(--muted); }
+.evdate .tbd { font-size:11px; font-weight:700; color:var(--muted); padding-top:8px; }
+.evbody { flex:1; min-width:0; }
+.evbody h4 { font-size:15px; font-weight:700; color:var(--navy); }
+.evmeta { font-size:12px; color:var(--muted); margin-top:3px; }
+.evwhy { font-size:13px; margin-top:8px; line-height:1.55; }
+.evwho { font-size:12.5px; color:var(--muted); margin-top:6px; }
+.evstat { font-size:9.5px; font-weight:800; letter-spacing:.06em; padding:2px 8px; border-radius:99px;
+  text-transform:uppercase; margin-left:8px; vertical-align:middle; }
+.evstat.confirmed { background:var(--green-bg); color:var(--green); }
+.evstat.dated { background:var(--blue-bg); color:var(--navy); }
+.evstat.monitor { background:var(--amber-bg); color:var(--amber); }
+.evlink { font-size:12px; font-weight:600; color:var(--navy); margin-top:8px; display:inline-block; }
+
+/* --- regions --- */
+.regblock { margin-bottom:22px; }
+.regblock h3 { font-size:15px; color:var(--navy); font-weight:700; }
+.regnote { font-size:13px; color:var(--muted); margin:5px 0 11px; line-height:1.5; }
+.regrid { display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:10px; }
+.regcard { border:1px solid var(--line); border-radius:10px; padding:12px 14px; background:var(--card); cursor:pointer; }
+.regcard:hover { border-color:var(--navy-2); }
+.regcard b { font-size:14px; color:var(--navy); display:block; }
+.regcard .hqline { font-size:12px; color:var(--muted); margin-top:3px; }
+.regcard .sectline { font-size:11.5px; color:var(--muted); margin-top:5px; }
+.paneintro { font-size:13.5px; color:var(--muted); max-width:760px; margin:14px 0 18px; line-height:1.6; }
+
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div id="home">
+    <div class="hero">
+      <div class="hero-top">
+        <div>
+          <h1>UpLabs BD Intelligence Dashboard</h1>
+          <p><span id="ccount">20</span> US industrial targets ($2B&ndash;$10B revenue). For each: the problem they have publicly admitted in earnings reports, the company UpLabs could create to solve it, and how to get in the room. Click any company for the full deep dive — including its C-suite, where its executives will be, and a LinkedIn lookup for every name.</p>
+        </div>
+        <div class="hero-right">
+        <div class="add-wrap">
+          <button class="addbtn" onclick="toggleAdd(event)" title="Add a company to the dashboard">+ Add</button>
+          <div id="addModal" class="dropdown hidden">
+            <div class="modal-head">
+              <h3>Add a company</h3>
+              <button class="xbtn" onclick="closeAdd()" title="Close (Esc)">&times;</button>
+            </div>
+            <div class="sub">Type any company &mdash; name or ticker, public or private, on the quick list or not. Select the exact match (or your typed name) and Claude will research its earnings and add a full deep dive plus workbook rows.</div>
+            <div id="addStep1">
+              <input type="text" id="addSearch" placeholder="e.g. Dover, TDG, Flowserve..." oninput="filterCompanies()" autocomplete="off">
+              <div class="results" id="addResults"></div>
+            </div>
+            <div id="addStep2" class="hidden"></div>
+          </div>
+        </div>
+        <div class="brandmark" title="UP.Labs">UP<span>.</span>LABS</div>
+        </div>
+      </div>
+      <div class="stats">
+        <div class="stat"><b id="scount">20</b>target companies</div>
+        <div class="stat"><b id="seccount">6</b>sectors</div>
+        <div class="stat"><b>5</b>flagship deep dives</div>
+        <div class="stat"><b>6</b>dated windows</div>
+        <div class="stat"><b>11</b>leadership changes tracked</div>
+      </div>
+    </div>
+    <div class="navtabs">
+      <button class="navtab on" id="tab-companies" onclick="setView('companies')">Companies</button>
+      <button class="navtab" id="tab-calendar" onclick="setView('calendar')">Calendar &amp; events</button>
+      <button class="navtab" id="tab-regions" onclick="setView('regions')">By location</button>
+    </div>
+    <div id="companiesPane">
+    <div class="toolbar">
+      <input type="text" id="homeSearch" placeholder="Search companies, sectors, angles..." oninput="FILTER.q=this.value.trim().toLowerCase();renderHome()" autocomplete="off">
+      <div class="chips-row" id="chipsRow"></div>
+    </div>
+    <div id="sectors"></div>
+    </div>
+    <div id="calendarPane" class="hidden"></div>
+    <div id="regionsPane" class="hidden"></div>
+    <p class="note">All evidence paraphrased from companies' own 2026 earnings calls, filings and press. Company research July 2026; C-suite, events and locations verified 5 September 2026 &middot; verify figures against primary filings before outreach.</p>
+  </div>
+  <div id="detail" class="hidden"></div>
+
+</div>
+<script>
+const DATA = [
+/* ============ FLAGSHIP 5 ============ */
+{ id:"cf", name:"CF Industries", sector:"Fertilizer & Ag Inputs", rev:"$6.0B", hq:"Northbrook, IL", flagship:true, leadChange:true, hot:true,
+  tagline:"World's largest ammonia (fertilizer) producer. A plant breakdown they had to confess to investors makes them the #1 lead on this list.",
+  field:"CF makes nitrogen fertilizer by running some of the largest ammonia plants on earth. Their business is simple but brutal: buy natural gas, convert it into ammonia, sell it to farmers. Profit lives or dies on keeping giant plants running and on the gap between gas cost and fertilizer price. They are also spending ~$1.3B a year building 'clean' low-carbon ammonia plants (the Blue Point project, online ~2029).",
+  problem:"In Q1 2026 they had to tell investors that earnings were worse partly because of an <b>extended breakdown at their Yazoo City plant</b>. Plants this size lose millions for every day offline &mdash; and right now CF finds out about failures <i>after</i> they happen. On top of that, their profits swing wildly with natural-gas prices (up year-over-year), which they largely just absorb. And the whole company is mid-handover: a brand-new CEO (Christopher Bohn, Jan 2026) and new CFO (Andrew Scribner) are actively resetting strategy.",
+  evidence:[
+    {src:"Q1 2026 earnings call &middot; May 7, 2026", q:"Cost of sales rose primarily due to higher maintenance costs, including an extended outage at the Yazoo City complex, plus higher realized natural-gas costs ($4.57/MMBtu).", why:"They NAMED unplanned downtime as a reason earnings were worse — a public confession of the exact problem.", link:"https://www.fool.com/earnings/call-transcripts/2026/05/07/cf-industries-cf-q1-2026-earnings-transcript/"},
+    {src:"Q1 2026 earnings call &middot; May 7, 2026", q:"Reaffirmed ~$1.3B of 2026 capex including the Blue Point low-carbon ammonia JV (+1.5M tons capacity, online ~2029), with a stated focus on 'safe and reliable operations.'", why:"Huge sunk capital that reliability problems directly threaten — every 1% of uptime is worth enormous sums.", link:"https://www.investing.com/news/transcripts/earnings-call-transcript-cf-industries-q1-2026-results-exceed-forecasts-93CH-4670458"},
+    {src:"CEO succession &middot; Jan 2026", q:"Tony Will retired Jan 4, 2026; Christopher Bohn (previously COO) became President & CEO Jan 5. Andrew Scribner elected CFO in 2026.", why:"Stale on the original target list — corrected. A new CEO is the ideal audience for a fresh idea.", link:"https://www.businesswire.com/news/home/20250907484844/en/CF-Industries-W.-Anthony-Will-to-Retire-as-President-and-Chief-Executive-Officer-January-4-2026-Christopher-D.-Bohn-Elected-Successor"}],
+  ventureName:"Predictive-maintenance intelligence for heavy chemical plants",
+  venture:"A startup that instruments ammonia/chemical plants with sensors + AI models that predict equipment failure <i>before</i> it happens, turning crisis breakdowns into scheduled maintenance. CF is customer #1 because they just publicly paid the price of not having this &mdash; and the product then sells to every fertilizer, chemical and refining operator with the same problem. A second wedge exists in gas-price/energy-cost intelligence, but reliability is the sharper opening.",
+  approach:[
+    "Open with the earnings call itself: 'You told investors Yazoo City cost you the quarter — we want to build the company that makes that the last time.'",
+    "Target the new CEO Bohn early in his tenure (he came from COO — operations is his home turf and reliability is his legacy issue to fix).",
+    "Route in parallel through Erik Mayer (VP Clean Energy & BD) — frame reliability as protecting the $1.3B/yr Blue Point investment.",
+    "Nearest touchpoint: Q2 earnings call Aug 6, 2026 — listen for further reliability/maintenance commentary to sharpen the pitch."],
+  people:[
+    {n:"Christopher D. Bohn", t:"President & CEO (since Jan 2026)", w:"New CEO, ex-COO — owns reliability + decarbonization and has a mandate to make his mark."},
+    {n:"Erik Mayer", t:"VP, Clean Energy & Business Development", w:"Owns the decarbonization agenda; sponsor for anything protecting Blue Point."},
+    {n:"Andrew T. Scribner", t:"EVP & CFO (new 2026)", w:"Capital gate — a reliability venture protects the $1.3B/yr capex program he underwrites."}]
+},
+{ id:"osk", name:"Oshkosh", sector:"Heavy Machinery", rev:"$10.7B", hq:"Oshkosh, WI", flagship:true, hot:true,
+  tagline:"Builds fire trucks, USPS mail trucks and JLG lifts. Tariff costs exploding $35M → $200M — the clearest quantified pain on the list.",
+  field:"Oshkosh builds specialty vehicles: fire engines, military trucks, the new USPS mail truck (NGDV), and JLG aerial work platforms. They import huge volumes of parts, assemble in the US, and sell largely on multi-year government and fleet contracts. They are also pushing hard into autonomy and AI — they showed autonomous job-site machines at CES 2026 and bought an autonomy startup ('Canvas') for JLG.",
+  problem:"Tariffs on the parts they import are set to cost <b>~$200M in 2026, up from ~$35M in 2025</b> — and their current mitigation is people manually renegotiating with suppliers, a moving target attacked by hand. Their Vocational segment also has admitted 'operational disruptions' pressuring margins, and the whole year's guidance leans on a strong Q4 — meaning little room for execution error. Meanwhile they clearly want autonomy/AI capability but keep having to buy it (Canvas) rather than build it.",
+  evidence:[
+    {src:"Q1 2026 earnings / analyst coverage", q:"Tariff costs are expected to rise from roughly $35M in 2025 to ~$200M in 2026; management aims to keep the net impact neutral through cost mitigation and supplier negotiations.", why:"A $200M problem being fought manually — quantified, named, and recurring.", link:"https://finance.yahoo.com/news/osk-q1-deep-dive-mixed-104455645.html"},
+    {src:"Q1 2026 earnings call", q:"Near-term margin pressure attributed to product mix, higher overhead, tariffs and operational disruptions in the Vocational segment; 2026 guidance is back-end weighted.", why:"'Operational disruptions' in their own words — an execution/throughput gap.", link:"https://stockstory.org/us/stocks/nyse/osk/news/earnings-call/osk-q1-deep-dive-mixed-segment-performance-and-back-end-weighted-outlook-shape-2026"},
+    {src:"CES 2026 / Q1 2026 call", q:"Showed autonomy, AI and connectivity concepts (welding robot on a JLG boom, autonomous scissor lifts); called the 'Canvas' acquisition central to JLG's autonomy strategy. NGDV passed its 5,000th unit with 10M+ fleet miles.", why:"They buy capability they lack — proof they'd back a co-built venture. NGDV fleet data is a second opportunity.", link:"https://www.insidermonkey.com/blog/oshkosh-corporation-nyseosk-q1-2026-earnings-call-transcript-1758053/"}],
+  ventureName:"Tariff & supplier-cost optimization engine",
+  venture:"A startup whose software maps every imported part across a manufacturer's bill of materials, models its tariff exposure in real time, and automatically surfaces cheaper sourcing, routing and supplier options — replacing armies of people renegotiating by hand. Oshkosh is customer #1 with a $200M problem; every US manufacturer facing the same tariff wave is the market. A second thesis: production-throughput AI for the disrupted Vocational plants.",
+  approach:[
+    "Lead with their own number: 'You disclosed a $35M→$200M tariff jump — we want to build the company that automates what your supply team is doing manually.'",
+    "Entry point is CIO Anupam Khare — he already runs an AI/data-science practice and can champion a data venture internally.",
+    "CFO Matt Field is the economic buyer: neutralizing tariff cost is literally his stated 2026 commitment to investors.",
+    "Watch CES 2027 (they exhibited autonomy at CES 2026) and quarterly calls for warm timing."],
+  people:[
+    {n:"John Pfeifer", t:"President & CEO", w:"Champions the autonomy/AI vision; already acquires startups — culturally pre-sold on external building."},
+    {n:"Anupam Khare", t:"SVP & Global Chief Information/Digital Officer", w:"Runs a real AI & data-science practice — the most natural entry point on the entire list."},
+    {n:"Matt Field", t:"EVP & CFO", w:"Owns the tariff-neutrality promise made to investors — the economic buyer for cost intelligence."}]
+},
+{ id:"ttc", name:"The Toro Company", sector:"Heavy Machinery", rev:"$4.5B", hq:"Bloomington, MN", flagship:true,
+  tagline:"Makes mowers and turf equipment. Their robot mowers work — but customers can't figure out how to use them, and the CEO said so.",
+  field:"Toro makes lawn and turf equipment: mowers for golf courses, landscaping contractors, and homeowners, plus snow and underground-construction gear. Their declared strategy rests on three legs: electrification, autonomous machines, and smart connected products. They bought two robotics startups (Left Hand Robotics, TURFLYNX) to build autonomous mowers.",
+  problem:"The robots work; the <b>adoption doesn't</b>. On the Q2 2026 call, CEO Rick Olson tempered revenue expectations because customers are still 'figuring out how to incorporate autonomous solutions into their operations' — golf courses and landscaping firms don't know how to fold robots into daily crews, so they demo but don't deploy at scale. Meanwhile ~$120M of tariff cost is becoming a permanent run-rate, inventory is running below demand in key lines (a forecasting gap), and residential demand is soft.",
+  evidence:[
+    {src:"Q2 2026 earnings call &middot; Jun 4, 2026", q:"Olson said Toro sees enthusiasm and growing demos for autonomous products but tempered near-term revenue expectations as customers 'figure out how to incorporate autonomous solutions into their operations.'", why:"The CEO publicly named the adoption gap — the venture IS this sentence.", link:"https://www.fool.com/earnings/call-transcripts/2026/06/04/toro-ttc-q2-2026-earnings-transcript/"},
+    {src:"Q2 2026 earnings call &middot; Jun 4, 2026", q:"Exploring AI in autonomous navigation, R&D prototyping, simulation and back-office; factory floor uses collaborative robots, AI vision systems, ML component verification and AR weld checks.", why:"Broad AI curiosity without a productized platform — multiple co-build surfaces.", link:"https://www.fool.com/earnings/call-transcripts/2026/06/04/toro-ttc-q2-2026-earnings-transcript/"},
+    {src:"Q2 2026 earnings call", q:"~$120M gross tariff expense expected to persist as a steady-state run-rate into fiscal 2027; landscape-contractor and residential inventory below desired levels against pockets of elevated demand.", why:"A permanent cost problem + a demand-forecasting gap, both admitted.", link:"https://www.investing.com/news/transcripts/earnings-call-transcript-toro-q2-2026-revenue-beats-forecast-stock-rises-93CH-4727105"}],
+  ventureName:"Autonomous-fleet deployment & enablement company",
+  venture:"A startup that makes deploying autonomous mowers turnkey for Toro's customers: site mapping, crew training, fleet monitoring, maintenance scheduling and ROI reporting — 'robots as a managed service.' Toro sponsors it because it unlocks the revenue Olson is deferring; customers buy because adopting a robot becomes as easy as hiring a service. The model then extends to any OEM whose autonomous products outrun their customers' ability to absorb them.",
+  approach:[
+    "Frame it as revenue unlock, not cost saving: 'Your machines are ready — your customers aren't. We'll build the company that closes that gap.'",
+    "Pitch CEO Rick Olson with his own earnings-call sentence; route operations detail through President/COO Edric Funk, who feels the rollout friction daily.",
+    "Time it around Equip Exposition 2026 (Louisville, Oct) — Toro's biggest annual showcase, where autonomy adoption will be front of mind.",
+    "Their own acquisition history (Left Hand Robotics, TURFLYNX) proves they embrace outside builders."],
+  people:[
+    {n:"Rick Olson", t:"Chairman & CEO", w:"Publicly owns the autonomy strategy AND its adoption gap — pitch his own words back to him."},
+    {n:"Edric Funk", t:"President & COO", w:"Runs the rollout; feels customer integration friction firsthand."}]
+},
+{ id:"axta", name:"Axalta Coating Systems", sector:"Paint & Coatings", rev:"$5.3B", hq:"Philadelphia, PA", flagship:true, hot:true,
+  tagline:"Global car-paint maker. Proved AI works in their factories (award-winning TintMaster) — then stopped at one process. AkzoNobel merger looming.",
+  field:"Axalta makes coatings — mainly paint for cars: refinish paint for the body shops that repair collision damage (their crown jewel, sold to tens of thousands of shops), coatings applied on auto manufacturers' assembly lines, and industrial coatings for everything from pipelines to appliances. Spun out of DuPont in 2013, they're one of the world's few coatings pure-plays. Paint manufacturing is precision chemistry at scale: getting color exactly right, batch after batch, across thousands of formulations, is genuinely hard — and expensive to get wrong, which is why their TintMaster AI (which fixed exactly that problem) mattered enough to win a 2026 Edison Award.",
+  problem:"Core volumes are falling (<b>-6.2% in Q2 2026</b>, concentrated in North American refinish and industrial), raw-material inflation is guided to peak in H2, and they are defending profit through cost discipline rather than growth. Here's the interesting part: they already proved AI fixes their factory problems — TintMaster AI attacked color variability and improved right-first-time output by up to 29%, winning a 2026 Edison Award — but they've applied AI to exactly <i>one</i> process. Everything adjacent (QA, scheduling, formulation, batch optimization) is still manual. And they're about to merge with AkzoNobel: two giants' plants, systems and data will need stitching together.",
+  evidence:[
+    {src:"2026 Edison Awards &middot; Apr 17, 2026", q:"CTO Robert Roop explained TintMaster AI was built because manual paint-recipe adjustment causes delay and waste; neural networks pre-adjust recipes, improving right-first-time by up to 29%.", why:"Proven, quantified AI ROI in their own plants — the warmest possible wedge for 'the next one.'", link:"https://ir.axalta.com/news/press-releases/detail/681/axalta-earns-three-2026-edison-awards-for-innovations-in-automotive-customization-electric-vehicle-safety-and-ai-powered-color-technology"},
+    {src:"Q2 2026 results &middot; Jul 28, 2026", q:"Volumes down 6.2% on North American Refinish and Industrial weakness; mid-single-digit raw-material inflation guided, peaking in Q3–Q4; profitability defended via cost cuts (SG&A -7%).", why:"Growth stalled; efficiency ventures with hard ROI get a hearing.", link:"https://www.repairerdrivennews.com/2026/07/29/axalta-expecting-some-uncertainty-for-rest-of-2026-positive-outlook-regarding-akzonobel-merger/"},
+    {src:"Merger filings / press &middot; 2026", q:"The AkzoNobel-Axalta merger is progressing toward a shareholder vote, with management citing 'some uncertainty' for the rest of 2026.", why:"A rare, time-boxed integration wave — systems/data harmonization pain arrives on a known schedule.", link:"https://www.stocktitan.net/sec-filings/AXTA/425-axalta-coating-systems-ltd-business-combination-communication-f5b5e728ece6.html"}],
+  ventureName:"'The next TintMaster' — manufacturing-process AI, or merger data-integration",
+  venture:"Thesis A: co-build the next factory AI — pick the adjacent process (quality control, batch scheduling, formulation) and productize it the way TintMaster productized color. Axalta already knows this works; the venture industrializes it and sells it across coatings/chemicals. Thesis B (time-boxed): a manufacturing data-integration company that harmonizes plant systems and data across the AkzoNobel merger — a problem they are about to have acutely, then a product for every industrial merger after.",
+  approach:[
+    "Entry point is CTO Robert Roop — congratulate the Edison Awards, then ask the natural question: 'which process is next, and why build it alone?'",
+    "For CEO Villavarayan (ex-Meritor, ops-minded), frame everything as right-first-time percentage and cost per batch — hard ROI only.",
+    "Time-box the merger thesis: pitch BEFORE integration planning locks in vendors.",
+    "Nearest touchpoints: post-Q2 follow-up now; watch the merger vote date for the integration angle."],
+  people:[
+    {n:"Chris Villavarayan", t:"CEO & President", w:"Ops/turnaround background — receptive to ventures with quantified factory ROI."},
+    {n:"Robert Roop", t:"SVP & Chief Technology Officer", w:"Owns TintMaster and the innovation agenda — the natural co-build partner."}]
+},
+{ id:"rok", name:"Rockwell Automation", sector:"Industrial Automation", rev:"$8.3B", hq:"Milwaukee, WI", flagship:true,
+  tagline:"America's biggest factory-automation company. CEO said exactly what AI he wants — narrow and applied — while chip costs squeeze his margins.",
+  field:"Rockwell sells the hardware and software that runs factories: the programmable controllers, sensors, drives and industrial software that automate production lines across automotive, food, pharma and consumer-goods plants. If a factory in America is automated, odds are Rockwell equipment is inside it — which makes them both a target AND a lens: their earnings are a readout on what every US manufacturer is doing about automation and AI. CEO Blake Moret (in seat since 2016) is steering toward 'software-defined automation,' and their giant annual customer event, Automation Fair (Nov 6-9, 2026, Boston), is the industry's main stage.",
+  problem:"Two things. First, a margin squeeze they're absorbing rather than solving: rising memory-chip and supplier costs create a <b>double-digit-million-dollar headwind</b> in H2 2026, hitting their Software & Control margins hardest — while trade uncertainty delays customers' big projects. Second, an AI posture gap: CEO Blake Moret says Rockwell uses agentic AI internally 'for productivity' (ad hoc, not productized) and explicitly does NOT want general-purpose AI — he wants narrow AI applied to specific problems. He has, in effect, published the spec of what he'd buy.",
+  evidence:[
+    {src:"Q2 FY2026 earnings call", q:"Moret: Rockwell applies AI to specific applications and productivity rather than offering a general language-model 'sandbox'; agentic AI is already used internally for productivity; vision AI cited for high-speed packaging.", why:"The CEO published the shape of the AI he'll buy — narrow, applied, ROI-first. That's a co-build spec.", link:"https://www.investing.com/news/transcripts/earnings-call-transcript-rockwell-automation-q2-2026-earnings-beat-boosts-stock-93CH-4659462"},
+    {src:"Q2 FY2026 guidance", q:"Double-digit-million headwind from rising memory costs and supplier inflation in H2, disproportionately hitting Software & Control margins in Q3; trade volatility delaying large capital projects in auto and CPG.", why:"A named, quantified cost pain — supply-cost intelligence lands exactly here.", link:"https://finance.yahoo.com/markets/stocks/articles/rockwell-automation-inc-q2-2026-165228423.html"},
+    {src:"Automation Fair 2026 — Nov 6-9, Boston", q:"Moret keynotes the future of industrial operations; exec panel 'Creating the Factory of the Future' with Tessa Myers (SVP Intelligent Devices).", why:"The single best confirmed in-person access point on the entire target list.", link:"https://www.rockwellautomation.com/en-us/events/automation-fair/experience/keynotes.html"}],
+  ventureName:"Component supply-cost intelligence (or productized applied-AI ventures)",
+  venture:"A startup that predicts electronic-component price spikes and supply risk (memory chips first), and optimizes purchasing/hedging decisions for manufacturers — aimed at the exact line item currently squeezing Rockwell's margins. Alternative thesis: Rockwell has told the world it wants narrow applied AI; UpLabs can co-build a specific one (e.g., vision-AI QA for a customer vertical) with Rockwell as first customer and distribution partner to its enormous installed base.",
+  approach:[
+    "Automation Fair, Nov 6-9, Boston, is the play: Moret keynotes, executives are accessible, and the theme IS applied AI. Be in the room.",
+    "Echo Moret's own framing — 'specific applications, not sandboxes' — and bring one concrete venture, not a platform pitch.",
+    "CDIO Chris Nardecchia owns the internal AI that's currently ad hoc; CFO Christian Rothe owns the margin squeeze — two doors, same building.",
+    "Caution: Rockwell partners constantly; differentiate the venture-studio model (they get a company built for them, not a vendor)."],
+  people:[
+    {n:"Blake Moret", t:"Chairman & CEO", w:"Sets and funds the vision; his 'narrow applied AI' stance is a published buying spec."},
+    {n:"Chris Nardecchia", t:"SVP, Chief Digital & Information Officer", w:"Owns the internal AI being done ad hoc — sponsor for productizing it."},
+    {n:"Tessa Myers", t:"SVP, Intelligent Devices", w:"On the 'Factory of the Future' panel at Automation Fair — accessible senior voice."}]
+},
+/* ============ THE OTHER 15 ============ */
+{ id:"ir", name:"Ingersoll Rand", sector:"Heavy Machinery", rev:"$7.2B", hq:"Davidson, NC", hot:true,
+  tagline:"Compressors and flow equipment. Buys 8-12 companies a year — the most 'buy-or-build' culture on the list.",
+  field:"Ingersoll Rand makes air compressors, pumps, blowers and flow-control equipment — the unglamorous machines that sit inside almost every factory, food plant and hospital on earth (~21,700 employees, $7.65B in 2025 revenue). Compressed air is sometimes called industry's 'fourth utility,' and it's notoriously wasteful: a huge share of the energy fed into compressors is lost. Their real distinguishing feature, though, is the operating model: they acquire constantly — adding 400–500 basis points of revenue inorganically every single year — then run an efficiency playbook ('IRX') on everything they buy. They also talk up IIoT-connected equipment and expansion into carbon-capture technologies.",
+  problem:"Three things. First, the deal machine needs feeding: growth by acquisition requires a constant pipeline of things worth buying, and a co-built venture is exactly that. Second, their earnings admit real headwinds — <b>Middle East order delays, tariff pressure on margins, and softness in Europe and China</b> — that their hardware portfolio can't offset alone. Third, and most interesting: for a company whose machines burn so much energy across a massive installed base, the software/intelligence layer on top of that base is thin relative to its potential. They connect machines; they don't yet mine them.",
+  evidence:[
+    {src:"Q1 2026 earnings call", q:"Reaffirmed 400–500 bps of annualized inorganic revenue for 2026 with additional deals expected to close in coming months; cited geopolitical order-timing in the Middle East, tariff-related margin pressure, and economic uncertainty in Europe and China as headwinds.", why:"A company that adds startups as a habit — the most natural home for a co-built venture as first customer or eventual acquirer.", link:"https://www.investing.com/news/transcripts/earnings-call-transcript-ingersoll-rand-q1-2026-beats-earnings-expectations-despite-stock-dip-93CH-4645341"},
+    {src:"2026 strategy commentary / press", q:"Reynal emphasized 'commitment to innovation and operational excellence' positioning the company to 'navigate complex market dynamics,' with strategic growth initiatives including technology integration and expansion in carbon-capture technologies.", why:"Explicit appetite for technology-led growth beyond the core hardware — an open lane for a venture pitch.", link:"https://intellectia.ai/news/stock/ingersoll-rand-to-release-q2-2026-earnings-on-july-30"},
+    {src:"Q2 2026 earnings — released Jul 30, 2026", q:"Q2 results released after market close July 30, with the earnings call scheduled for July 31 at 8am ET.", why:"Freshest possible data point — review this call before any outreach; deal-pipeline and IIoT commentary will sharpen the pitch.", link:"https://www.businesswire.com/news/home/20260701877599/en/Ingersoll-Rand-Schedules-Second-Quarter-2026-Earnings-Release-and-Conference-Call"}],
+  ventureName:"Compressed-air energy & uptime intelligence for the installed base",
+  venture:"A startup that turns Ingersoll Rand's massive installed base of compressors and pumps into a predictive-uptime and energy-optimization service: AI on machine telemetry that finds leaks, predicts failures, and cuts one of industry's biggest hidden energy costs. IR is customer #1 and distribution channel (they touch nearly every factory), and — uniquely on this list — a plausible eventual acquirer, which de-risks the venture's exit from day one. The IRX efficiency culture means a quantified energy-savings pitch lands on receptive ears.",
+  approach:[
+    "Pitch the M&A machine, not against it: frame the venture as a proprietary deal-flow channel — 'we build it, you get first-customer economics and first-refusal on the exit.'",
+    "CEO Vicente Reynal (10+ years in seat) and CFO Vik Kini run the deal engine — approach them as capital allocators with a returns story, not a technology story.",
+    "Review the July 31 Q2 earnings call first — their commentary on demand softness and the deal pipeline will tell you which framing (growth vs. efficiency) is warmer this quarter.",
+    "Reference their own playbook: they bought their way into IIoT and carbon capture; a co-build is the same motion with better economics."],
+  people:[
+    {n:"Vicente Reynal", t:"Chairman, President & CEO", w:"Runs the acquisition engine; thinks in deals and IRX efficiency metrics — speak that language."},
+    {n:"Vik Kini", t:"SVP & CFO", w:"Gate and enabler for inorganic bets; underwriting a venture is a familiar shape for him."}]
+},
+{ id:"rrx", name:"Regal Rexnord", sector:"Heavy Machinery", rev:"$6.0B", hq:"Milwaukee, WI", hot:true,
+  tagline:"Motors and power transmission. The most AI-mature digital team on the list — data platform already built.",
+  field:"Regal Rexnord makes electric motors, drives, bearings and power-transmission components — the parts that make factory lines, conveyor systems, aerospace actuators and data-center cooling systems actually move. It's a $6B company assembled through big mergers (Regal Beloit + Rexnord + Altra), which left it with dozens of brands and product catalogs. What makes them special for UpLabs isn't the products — it's the digital organization: CDIO Tim Dickson has already built a customer-facing AI chatbot (RRXy), an internal AI assistant (RRXGPT), consolidated the enterprise's data onto a unified Snowflake platform, and overhauled e-commerce end to end.",
+  problem:"They've built genuinely impressive internal AI — and <b>none of it is productized revenue</b>. RRXy and RRXGPT cut costs and improve experience, but they're tools, not businesses. Meanwhile the company has promised investors ~10% EPS growth in 2026 ($10.20–$11.00 adjusted), which must come from somewhere in a soft industrial market. A $6B industrial with a consolidated data platform, gen-AI experience, and a sprawling multi-brand catalog is a launchpad waiting for a venture: the foundation exists, the product company on top of it doesn't. Classic 'built the runway, no plane' situation.",
+  evidence:[
+    {src:"Forbes &middot; Feb 2025", q:"Dickson described spearheading RRXy (customer chatbot), RRXGPT (internal assistant), a comprehensive e-commerce overhaul and enterprise-wide data consolidation, with Snowflake as the unified data platform he saw as foundational for generative-AI applications.", why:"Data foundation + gen-AI experience already live = the shortest technical runway to a working co-build on the list.", link:"https://www.forbes.com/sites/peterhigh/2025/02/24/digital-innovation-fuels-regal-rexnords-industrial-evolution/"},
+    {src:"Technovation podcast (Peter High) &middot; 2025-26", q:"In 'AI-Driven Digital Growth at Regal Rexnord,' Dickson laid out how digital and AI initiatives are meant to drive business growth and customer experience — not just IT efficiency.", why:"He's publicly on record wanting AI to become a GROWTH engine — exactly the gap a co-built venture fills.", link:"https://www.metisstrategy.com/interview/tim-dickson/"},
+    {src:"Q4 2025 results / 2026 guidance (8-K)", q:"Introduced 2026 guidance of $10.20–$11.00 adjusted diluted EPS — roughly 10% growth at the midpoint — that management must now deliver in a mixed industrial-demand environment.", why:"A public growth promise creates internal appetite for new revenue engines beyond the core.", link:"https://www.sec.gov/Archives/edgar/data/82811/000008281126000041/a4q2025earningsannouncement.htm"}],
+  ventureName:"Industrial parts-intelligence venture on their data platform",
+  venture:"Co-build a company on top of the data stack Dickson already assembled. Sharpest thesis: an AI parts-selection and cross-reference engine — a chronic, industry-wide pain (engineers waste enormous time matching motors/bearings/drives across brands and legacy catalogs) that Regal Rexnord's uniquely messy multi-brand catalog data is the perfect training ground for. Launched with RRX data as the moat and RRX customers as the first market, then sold across the industry. Alternative: predictive-maintenance intelligence using their motor/bearing telemetry. Either way, the pitch is turning a cost-center data platform into an equity-owning revenue engine.",
+  approach:[
+    "Go straight to CDIO Tim Dickson — he does podcasts and interviews regularly (Technovation, Forbes), which means he's accessible and loves this topic; open by referencing his own interviews.",
+    "Frame: 'You built the foundation — Snowflake, RRXy, RRXGPT. Let's build the company on top of it.' It flatters the work AND names the gap in one sentence.",
+    "Dickson is the champion; CEO Louis Pinkham approves when it supports the ~10% EPS growth promise — bring the revenue model, not the tech demo.",
+    "Note the Milwaukee double-header: Regal Rexnord and Rockwell Automation are both headquartered there — one city visit can serve outreach to two of the list's strongest targets."],
+  people:[
+    {n:"Tim Dickson", t:"SVP, Chief Digital & Information Officer", w:"The standout digital leader on the list; foundation already laid; publicly wants AI as growth engine."},
+    {n:"Louis Pinkham", t:"CEO", w:"Backs the digital agenda; owns the 10% EPS growth promise — needs the revenue story."},
+    {n:"Rob Rehard", t:"EVP & CFO", w:"Capital gate; a venture that monetizes sunk data-platform investment is an easy underwrite."}]
+},
+{ id:"leco", name:"Lincoln Electric", sector:"Heavy Machinery", rev:"$4.2B", hq:"Cleveland, OH",
+  tagline:"Welding leader moving into automation — but its automation segment shrank last year.",
+  field:"Lincoln Electric is the world's welding company — for over 125 years the dominant name in welding machines, consumables (wire, electrodes) and now full automated production systems. Welding is everywhere metal is joined: cars, ships, bridges, pipelines, data-center steel. Their growth thesis is automation: robotic welding cells and complete automated lines (they recently commissioned one at a Harris facility that <i>tripled</i> the line's productivity). 2025 was a record year overall — $4.2B in sales (+6%), record adjusted EPS of $9.87 — and a new long-term strategy called 'RISE' launched in early 2026.",
+  problem:"The growth engine sputtered: <b>automation revenue fell mid-single-digits in 2025 (~$870M)</b>, including an 11% Q4 decline, even as the core welding business set records. Orders recovered late in the year, but the pattern is telling — they engineer world-class automated <i>hardware</i>, while the software/AI layer (real-time weld-quality verification, production analytics, welder guidance) is not where they lead. Meanwhile their customers' defining chronic pain is the skilled-welder shortage: everyone who buys welding equipment struggles to find people qualified to run it. That labor gap is what sells automation — and nobody has productized the AI layer that multiplies scarce welders.",
+  evidence:[
+    {src:"Q4 2025 / FY earnings call &middot; Feb 12, 2026", q:"Automation sales were $240M in Q4 (down 11% vs. record prior year) and ~$870M for 2025, a mid-single-digit decline; strong Q4 order rates and solid backlog expected to drive 2026 growth; new automated line at a Harris facility tripled productivity while improving quality; 'RISE' strategy advanced.", why:"Automation ambition + a soft segment = openness to a venture that differentiates the offer.", link:"https://www.fool.com/earnings/call-transcripts/2026/02/12/lincoln-electric-leco-earnings-call-transcript/"},
+    {src:"Q1 2026 earnings &middot; Apr 30, 2026", q:"Record quarterly sales and adjusted EPS while 'navigating heightened operating complexity from geopolitics and evolving trade negotiations.'", why:"Core business strong = capacity to invest; trade complexity = appetite for resilience/efficiency plays.", link:"https://www.investing.com/news/transcripts/earnings-call-transcript-lincoln-electric-beats-q1-2026-estimates-93CH-4650369"},
+    {src:"FY2025 results (8-K/press)", q:"2025 consolidated sales of $4.2B (+6%, driven by acquisitions and pricing) with record adjusted EPS of $9.87.", why:"A record-earnings platform funding the automation push — the venture rides a funded strategy, not a struggling one.", link:"https://www.sec.gov/Archives/edgar/data/0000059527/000005952726000010/leco-20260430xex99d1.htm"}],
+  ventureName:"Weld-quality AI / workforce-multiplier venture",
+  venture:"A startup doing AI weld-quality verification and welder-assist: computer vision that inspects welds in real time, catches defects before they're buried in the next pass, and guides less-experienced welders to expert-level output. It attacks the skilled-welder shortage that limits every Lincoln customer — one certified welder supervising AI-assisted stations instead of one torch. Lincoln is first customer and channel (bundled with their machines and automation cells); the venture stays independent and sells across fabrication. Their own Harris-facility result (tripled productivity via automation) is the internal proof this class of investment pays.",
+  approach:[
+    "Frame around their customers' labor shortage — the pain that already sells their automation. 'Your machines are limited by the welders your customers can't hire; we'll build the company that multiplies the welders they have.'",
+    "CEO Steve Hedlund owns RISE; pitch the venture as an accelerant aimed at the strategy's weakest segment (automation growth).",
+    "CFO Gabe Bruno underwrites from record-earnings strength — position as growth capital, not turnaround spend.",
+    "FABTECH (the fabrication industry's biggest trade show, fall 2026) is the natural venue — monitor speaker lists for Hedlund/automation execs and time outreach around it."],
+  people:[
+    {n:"Steve Hedlund", t:"Chairman, President & CEO", w:"Owns RISE; automation softness is his problem to fix — and his record earnings fund the fix."},
+    {n:"Gabe Bruno", t:"EVP & CFO", w:"Capital gate; record 2025 EPS gives him room to back growth bets."}]
+},
+{ id:"midd", name:"Middleby", sector:"Heavy Machinery", rev:"$3.9B", hq:"Elgin, IL",
+  tagline:"Commercial kitchen equipment, freshly spun off its food-processing arm to bet everything on the 'connected kitchen.'",
+  field:"Middleby makes the equipment behind commercial kitchens — the ovens, fryers, griddles, and beverage systems running inside restaurant chains, hotels and stadiums, assembled from dozens of acquired equipment brands over two decades. In July 2026 they completed a defining move: spinning off their entire food-processing business (now 'Midera,' trading separately on Nasdaq) to become a pure-play commercial-foodservice company. The declared growth story for what remains: innovation, connected kitchen solutions, IoT and automation across every product category.",
+  problem:"They've bet the company narrative on 'connected solutions' at the worst possible moment for their customers: restaurant traffic is soft, <b>consumer wallets became 'increasingly strained' through March and April</b>, and Commercial Foodservice EBITDA margin declined year-over-year in Q1. Here's the structural gap: decades of acquisitions left them with dozens of equipment brands whose machines don't share a data language — a fryer from one brand and an oven from another can't tell a chain operator anything coherent together. Declared IoT ambition + fragmented multi-brand data + customers desperate to cut operating costs = a connected-kitchen intelligence layer they need and can't easily build alone.",
+  evidence:[
+    {src:"Midera spinoff completion &middot; Jul 6, 2026", q:"FitzGerald: the separation is 'the culmination of strategic portfolio work to unlock full value potential,' with Middleby emerging as 'a pure-play commercial foodservice leader with a differentiated platform built on innovation, connected solutions, and market-leading brands.' Midera began trading Jul 7 as MFP.", why:"A freshly narrowed thesis — connected kitchen — that a data venture plugs straight into. His words, three weeks old.", link:"https://investors.middleby.com/news-releases/news-release-details/middleby-completes-spin-midera-food-processing"},
+    {src:"Q1 2026 earnings call &middot; Jun 1, 2026", q:"Industry conditions remained challenging in early 2026 with consumer wallets increasingly strained in March/April; Commercial Foodservice EBITDA margin declined year-over-year, with inflationary cost pressure expected to ease in H2.", why:"Customers under cost pressure = demand for equipment intelligence that cuts energy, labor and downtime — the venture's ROI case.", link:"https://www.fool.com/earnings/call-transcripts/2026/06/01/middleby-midd-q1-2026-earnings-transcript/"},
+    {src:"Spinoff announcement &middot; Mar 2025", q:"The separation was announced in March 2025 explicitly to create 'independent innovative leaders' — with Middleby highlighting new product launches in IoT and automation at industry events through the transition.", why:"A year-long deliberate repositioning around connectivity — this is strategy, not a talking point.", link:"https://www.forbes.com/sites/joecornell/2025/03/05/middleby-to-spin-off-its-food-processing-unit-in-2026/"}],
+  ventureName:"Kitchen-operations intelligence platform",
+  venture:"A startup that unifies data across Middleby's dozens of equipment brands into one kitchen-operations layer for restaurant chains: real-time energy optimization, downtime prediction, throughput analytics and automated maintenance dispatch across every piece of equipment regardless of brand. Middleby's install base (thousands of chain kitchens) is the moat and distribution; restaurant chains' cost crunch is the urgent demand; and the venture's independence means it can eventually ingest competitors' equipment too — becoming the operating system of the commercial kitchen. For a just-refocused Middleby, it's the product that makes the spinoff thesis true.",
+  approach:[
+    "Timing IS the pitch: three weeks post-spinoff, FitzGerald has publicly staked the company on 'connected solutions' — offer to build the company that makes the story real before the narrative goes stale.",
+    "Frame ROI in restaurant-operator terms — energy dollars, labor hours, downtime minutes saved per store per week — because their customers' strained wallets are the buying trigger.",
+    "The National Restaurant Association Show (Chicago, each May) is their headline venue and close to Elgin HQ — monitor speaker announcements and plan presence.",
+    "CFO Bryan Mittelman is under margin pressure now — a venture that lifts equipment attach-rates and service revenue is his story too."],
+  people:[
+    {n:"Tim FitzGerald", t:"CEO", w:"Just re-founded the company around connected foodservice — needs the story to become product, fast."},
+    {n:"Bryan Mittelman", t:"CFO", w:"Q1 margin decline makes efficiency/attach-rate ventures immediately attractive."}]
+},
+{ id:"emn", name:"Eastman Chemical", sector:"Chemicals", rev:"$9.4B", hq:"Kingsport, TN", hot:true,
+  tagline:"Specialty chemicals with a world-first plastic-recycling plant — and a CIO who already builds AI products.",
+  field:"Eastman makes specialty chemicals and advanced materials — the plastics in eyeglasses and car interlayers, fibers, additives — from its century-old Kingsport, Tennessee base. Two things distinguish them. First, they run the world's leading 'molecular recycling' operation: a methanolysis plant that chemically breaks waste plastic back into virgin-quality raw material, now hitting 90% yields. Second, their CIO Aldo Noseda is a rarity in industrials: his team <i>productizes</i> AI and sells it — Fluid Genius, which predicts thermal-fluid degradation for customers, generates independent revenue — alongside internal 'AI for the masses' copilots with risk-based guardrails.",
+  problem:"2026 is a prove-it year resting on execution they've told investors to expect: a <b>back-half-loaded ~$100M cost-reduction program</b> plus scaling recycling revenue ($60M of earnings in 2025, another $30M targeted in 2026) to push EPS past $6.00. The strategic ambition is more methanolysis plants — but each is a first-of-its-kind industrial process where feedstock quality (literally, what's in the garbage), yield optimization and plant reliability directly decide whether the economics work. The odd gap: the company that ALREADY productizes AI hasn't aimed that muscle at its own biggest bet as a product. Recycling intelligence is being done as internal engineering, not built as a company.",
+  evidence:[
+    {src:"Q1 2026 results / CEO interview (WJHL)", q:"Costa: methanolysis yields 'better than expected... we've hit 90% yields, which is extraordinary when you're taking garbage and turning it into first-quality, perfectly clear, high-quality polymer'; 2026 earnings rebound expected on cost cuts and recycling growth.", why:"A novel process scaling up + a cost mandate — both are co-build surfaces (yield AI, feedstock intelligence).", link:"https://www.wjhl.com/news/local/eastman-ceo-says-26-should-see-earnings-rebound-touts-methanolysis-facility/"},
+    {src:"Enterprise AI Innovators podcast", q:"Noseda described productizing data science for customers (Fluid Genius) and deploying secure internal AI on top of ChatGPT/Copilot with situational-risk guardrails — a deliberate two-track AI strategy since 2018.", why:"A CIO who already ships AI products — proven appetite AND capability to co-develop a venture.", link:"https://enterprisesoftware.blog/cio-episodes/ep-66-productizing-ai-and-internal-copilots-with-eastman-cio-aldo-noseda"},
+    {src:"Q1 2026 financial results &middot; Apr 30, 2026", q:"Targeting ~$100M of cost reductions in 2026 with full-year EPS expected above $6.00, supported by back-half-loaded savings and volume growth from circular-economy initiatives; recycling revenues ramping.", why:"The whole year's story depends on recycling economics + cost execution — exactly where a yield/feedstock venture pays.", link:"https://seekingalpha.com/news/4514700-eastman-targets-100m-cost-reduction-in-2026-as-recycling-revenues-ramp-up"}],
+  ventureName:"Circular-feedstock & yield intelligence",
+  venture:"A startup doing AI-driven feedstock grading and yield optimization for chemical recycling: computer vision + spectroscopy that grades incoming waste-plastic bales, predicts their yield impact, and tunes process parameters batch by batch. It makes every methanolysis plant — Eastman's next ones and eventual licensees' — economically predictable instead of experimental. Eastman is first customer with the world's flagship plant as the data source; the global circular-economy buildout (every chemical major has announced recycling plans) is the market. Noseda's Fluid Genius playbook proves Eastman knows how to co-develop and commercialize exactly this kind of product.",
+  approach:[
+    "Two warm doors, one building: CIO Noseda — approach via the productizing-AI topic he speaks publicly about ('Fluid Genius for recycling') — and CEO Costa via the recycling growth story.",
+    "Frame as protecting the earnings-rebound narrative: yield percentage points ARE the $30M recycling target; feedstock surprises are the biggest threat to it.",
+    "Kingsport's methanolysis plant gets regular media/investor attention — a site-visit ask is plausible and puts you in the room where the problem lives.",
+    "CFO Willie McLain owns the $100M cost program — position the venture's process-optimization angle as compounding his savings."],
+  people:[
+    {n:"Mark Costa", t:"Chairman & CEO", w:"Methanolysis is his legacy bet; anything de-risking its economics gets a hearing."},
+    {n:"Aldo Noseda", t:"SVP & Chief Information Officer", w:"Already productizes AI (Fluid Genius) — the proven co-builder on the list; 2024 ORBIE award winner."},
+    {n:"William (Willie) McLain", t:"SVP & CFO", w:"Owns the $100M cost program the venture compounds."}]
+},
+{ id:"alb", name:"Albemarle", sector:"Chemicals", rev:"$5.4B", hq:"Charlotte, NC",
+  tagline:"Top Western lithium producer whose CEO admits the economics don't work at current prices.",
+  field:"Albemarle is the West's biggest lithium company: they mine lithium (Australia, Chile, Nevada) and refine ('convert') it into the battery-grade chemicals inside EVs, plus a steadier specialty-chemicals arm. They ride the most violent commodity cycle in the energy transition — lithium prices collapsed after the 2022 boom, forcing them to idle their brand-new Kemerton plant in Australia, cut $459M of costs in 2025, sell their Ketjen stake, and chase another $100–150M of savings in 2026. Q1 2026 finally showed the turn: sales +33%, adjusted EBITDA +148%, $1.3B of debt paid down.",
+  problem:"CEO Kent Masters said the quiet part out loud: recent lithium price improvements <b>'are not enough to offset the challenges facing Western hard-rock lithium conversion operations.'</b> Translation: refining lithium in the West structurally costs too much versus China, and waiting for prices to recover won't fix it — which is why they idled a nearly-new plant. That's not a market problem, it's a cost-per-tonne process problem: energy intensity, yield losses, and process variability that Chinese converters have ground down through scale and iteration. Structural cost gaps are exactly what technology ventures attack — and the geopolitics of critical minerals means governments actively subsidize anyone credibly closing this gap.",
+  evidence:[
+    {src:"Q1 2026 earnings &middot; May 2026", q:"Masters: lithium price improvements alone cannot offset the challenges facing Western hard-rock conversion — motivating the Kemerton idling; the $100–150M 2026 cost program is on track ($40M delivered by Q1).", why:"A CEO publicly stating his cost structure is uncompetitive = an open door for process innovation.", link:"https://www.investing.com/news/transcripts/earnings-call-transcript-albemarles-q1-2026-earnings-soar-past-expectations-93CH-4685732"},
+    {src:"Q1 2026 results &middot; May 2026", q:"Net sales $1.4B (+33%) on Energy Storage volumes +14% and price +51%; adjusted EBITDA $664M (+148%); $1.3B debt reduction; ongoing cost and productivity improvements credited alongside pricing.", why:"The recovery gives them capital to invest again — the window where a process venture gets funded rather than deferred.", link:"https://www.albemarle.com/us/en/news/albemarle-reports-first-quarter-2026-results"},
+    {src:"CIO.com / WorkBoard — digital transformation record", q:"CIDO Patrick Thompson (since 2017) led an award-winning digital transformation including 'federated automation' for employee experience, reaching top-tier IT benchmarks (Hackett IT Master Class).", why:"A proven digital/automation champion inside the building — the internal co-development partner a process-AI venture needs.", link:"https://www.cio.com/article/436441/whats-sparking-an-all-electric-drive-for-the-helpdesk.html"}],
+  ventureName:"Lithium-conversion process optimization",
+  venture:"A startup applying AI process control and energy optimization to lithium conversion: model the kilns/reactors, cut energy per tonne, lift yields, stabilize quality — attacking the cost-per-tonne gap between Western plants and Chinese rivals that Masters says prices can't close. Albemarle is first customer (and could restart Kemerton on better economics as the proof point); every Western lithium and critical-minerals refiner shares the problem; and Western governments' onshoring subsidies (IRA, EU CRMA) give the venture an independent tailwind no ordinary industrial software company gets.",
+  approach:[
+    "Quote Masters back to himself: 'You said price won't fix Western conversion — process will. We'll build the company that closes the cost gap.'",
+    "CIDO Patrick Thompson is the internal champion — his transformation track record means he can sponsor and staff a co-development effort credibly.",
+    "Use the policy environment as the third leg of the pitch: subsidized demand for Western conversion capability strengthens the venture's standalone case beyond Albemarle.",
+    "Time it now: Q1's recovery (+148% EBITDA, debt down) reopens the investment window before the next price swing closes it."],
+  people:[
+    {n:"Kent Masters", t:"Chairman & CEO", w:"Publicly owns the cost-gap problem; idled Kemerton over it."},
+    {n:"Patrick Thompson", t:"Chief Information & Digital Transformation Officer", w:"Digital/automation champion since 2017 — natural sponsor with award-winning delivery record."},
+    {n:"Neal Sheorey", t:"EVP & CFO", w:"Owns the $100–150M cost program; a process venture compounds his target."}]
+},
+{ id:"esi", name:"Element Solutions", sector:"Chemicals", rev:"$2.4B", hq:"Miami, FL",
+  tagline:"Electronics chemistry riding the AI-chip boom — customers' technical roadmaps are outrunning everyone.",
+  field:"Element Solutions makes the invisible chemistry inside electronics manufacturing: plating chemistry for chips and circuit boards, semiconductor assembly materials, and surface treatments — the consumable science that determines whether an advanced chip package works or gets scrapped. The AI-chip buildout is pulling them upmarket fast: record Q2 2026 (net sales $978M, +15% organic), the Micromax acquisition adding ~$40M of EBITDA, nano-copper technology (Kuprion) scaling up, and a proposed combination with Solstice to build a bigger electronics-materials platform.",
+  problem:"CEO Ben Gliklich's own framing: customer engagements keep accelerating <b>'to meet the supply chain's ever-more challenging technical roadmaps.'</b> Decoded: AI chips need advanced packaging (stacking chips, finer interconnects), which demands precision process control at levels the whole industry is scrambling to hit. When a packaging line drifts even slightly, yield collapses — and at AI-chip values, every point of yield is enormous money. The gap: the process-data layer in advanced packaging is immature industry-wide. Chemistry suppliers like ESI see the process intimately but sell consumables, not intelligence; the data their chemistry generates isn't yet a product.",
+  evidence:[
+    {src:"Q2 2026 earnings call &middot; Jul 28, 2026", q:"Record revenue, adjusted EBITDA and EPS; organic sales +15%; 'customer engagements continue to accelerate to meet the supply chain's ever-more challenging technical roadmaps'; full-year EBITDA guidance raised to $690–710M.", why:"Riding a demand wave their customers' precision requirements make painful — process-intelligence territory.", link:"https://seekingalpha.com/article/4926298-element-solutions-inc-esi-q2-2026-earnings-call-transcript"},
+    {src:"Micromax guidance &middot; 2026", q:"The Micromax acquisition is expected to add ~$40M of EBITDA in 2026, supporting raised annual guidance, alongside Kuprion nano-copper scale-up in advanced electronics.", why:"Actively buying its way deeper into advanced-electronics materials — appetite for capability expansion is proven.", link:"https://seekingalpha.com/news/4510334-element-solutions-expects-micromax-acquisition-to-add-40m-ebitda-in-2026-while-raising-annual"},
+    {src:"Q1 2026 earnings call &middot; Apr 30, 2026", q:"Core electronics markets healthy with strategic priorities (Micromax integration, Kuprion) progressing; the proposed Solstice combination framed as forming 'a stronger, more differentiated electronics portfolio.'", why:"Portfolio-shaping mode: leadership is actively restructuring around the AI-electronics opportunity — new-venture conversations fit the moment.", link:"https://www.marketbeat.com/instant-alerts/element-solutions-q1-earnings-call-highlights-2026-04-30/"}],
+  ventureName:"Advanced-packaging process intelligence",
+  venture:"A startup doing AI process control and defect/yield prediction for advanced electronics packaging: sensors + models on plating and assembly lines that catch drift before it kills yield, co-developed with ESI's chemistry knowledge and customer access. ESI's chemistry is in the lines already — the venture turns that privileged position into the data/intelligence layer, sold to the packaging houses and OSATs scaling AI-chip production. For ESI, it deepens customer lock-in and adds a software economics layer; for the venture, the AI-chip capex supercycle is the market.",
+  approach:[
+    "Gliklich is young, financially fluent (ex-investment banker) and deal-minded — pitch structure and value creation (equity, exit paths, lock-in economics), not just technology.",
+    "Frame: 'Your chemistry + our venture's data layer = the yield partner for the AI-chip buildout' — it extends their strategy rather than competing with it.",
+    "The Solstice combination talks mean corporate development is at the table right now — route the venture conversation through the same strategic lens.",
+    "Semicon West and IPC APEX are the sector's stages — monitor for ESI speaker slots and time outreach to their appearances."],
+  people:[
+    {n:"Ben Gliklich", t:"CEO", w:"Deal-fluent operator riding the AI-chip wave; speaks value-creation language natively."},
+    {n:"Carey Dorman", t:"EVP & CFO", w:"Capital gate; raised guidance gives him room for strategic bets."}]
+},
+{ id:"ftv", name:"Fortive", sector:"Diversified Industrial", rev:"$6.2B", hq:"Everett, WA",
+  tagline:"Industrial software collector — CEO calls AI 'an accelerant, not a disruptor' and buys accordingly.",
+  field:"Fortive is what an industrial company looks like after it eats software: post-Ralliant spinoff (which carved out a third of the old company), it's a streamlined portfolio of ~10 software-heavy brands — Fluke test-and-measurement tools, Accruent and ServiceChannel facilities-management software, Gordian construction data. They've run an AI Center of Excellence since 2017 and already ship AI features across the portfolio: predictive maintenance in ServiceChannel and Accruent, Flash AI at Gordian, new capabilities in Fluke's eMaint. New CEO Olumide Soroye (ex-CoreLogic) runs a 'Fortive Accelerated' strategy of innovation, recurring revenue, and disciplined capital allocation.",
+  problem:"Less a weakness than a posture that creates the opening. Soroye publicly argues proprietary data, network effects and regulatory moats make Fortive <b>the 'trusted partner' customers turn to for AI deployment</b> — 'an accelerant, not a disruptor.' They grow by acquiring software assets and layering AI onto them. The gap is white space: industrial-AI product categories they haven't bought yet, where building from scratch inside a public company is slow and acquisitions are expensive. A co-built venture is effectively proprietary M&A pipeline — they see it grow from inception, distribution-test it through their brands, and hold a natural acquisition path with no auction.",
+  evidence:[
+    {src:"Citi conference &middot; 2026", q:"Soroye: proprietary data, network effects and regulatory moats make Fortive the trusted AI partner — 'AI is an accelerant, not a disruptor'; AI CoE established 2017; AI offerings cited across ServiceChannel, Accruent, Gordian and Fluke eMaint.", why:"A tech-native, acquisitive buyer that co-develops — low education cost, high partnership ceiling.", link:"https://fintool.com/news/fortive-citi-conference-ai-software-moats"},
+    {src:"Q2 2026 earnings &middot; Jul 29, 2026", q:"Core revenue growth 6.7%, adjusted EBITDA +12%, adjusted EPS +28%; 2026 EPS guidance raised to $2.95–$3.05; 'Fortive Accelerated' strategy credited — innovation, commercial investment, recurring customer value.", why:"Momentum + raised guidance = confident capital allocators; the right moment to propose a venture partnership.", link:"https://finance.biggo.com/news/US_FTV_2026-07-29"},
+    {src:"GeekWire profile of Soroye &middot; 2025", q:"Soroye profiled as refining Fortive's focus 'with help from AI' after the Ralliant spinoff left a streamlined portfolio of ~10 operating brands in healthcare, safety and productivity software.", why:"A CEO whose personal brand is AI-driven focus — the venture-studio conversation matches his identity.", link:"https://www.geekwire.com/2025/meet-olumide-soroye-fortives-new-ceo-helps-industrial-giant-refine-focus-with-help-from-ai/"}],
+  ventureName:"Industrial-AI venture as proprietary M&A pipeline",
+  venture:"Co-build in Fortive-adjacent white space — sharpest candidates: AI field-service intelligence (dispatch, diagnosis, parts prediction across their Fluke/eMaint/ServiceChannel customer base) or compliance automation for regulated facilities (their Accruent stronghold). Fortive brands distribute; Fortive is first customer; and the venture is built with a natural acquirer standing by from day one — the studio model's cleanest possible exit geometry. For Fortive, it's optioned M&A: equity-priced early exposure to a category they'd otherwise buy at a premium later.",
+  approach:[
+    "Pitch CEO Soroye (ex-CoreLogic data-business builder) as a portfolio move, not a vendor deal: 'venture as optioned M&A' — he'll recognize the shape instantly.",
+    "CFO Okerstrom (literally a former Expedia CEO) underwrites tech bets comfortably — bring SaaS metrics (NRR, CAC, attach rates), not industrial metaphors.",
+    "Use their own AI-partner positioning: 'You tell customers you're their trusted AI partner — we build the products that make that promise compound.'",
+    "They present regularly at Barclays and Citi industrial conferences — an accessible, predictable calendar of public appearances to time outreach around."],
+  people:[
+    {n:"Olumide Soroye", t:"CEO", w:"AI-forward operator; thinks in data businesses; new-ish in seat with a strategy to prove."},
+    {n:"Mark Okerstrom", t:"CFO", w:"Ex-Expedia CEO — tech-native capital allocator comfortable with venture-shaped bets."}]
+},
+{ id:"ayi", name:"Acuity Brands", sector:"Diversified / Electrical", rev:"$4.3B", hq:"Atlanta, GA",
+  tagline:"Lighting giant that became a 'software & sensors' company — Intelligent Spaces grew 45% last quarter.",
+  field:"Acuity was America's lighting company — the fixtures in offices, schools and warehouses. Under CEO Neil Ashe (ex-Google, ex-CBS Interactive, hired 2020) it executed the most complete pivot on this list: from 'bulbs and ballasts' to 'software and sensors,' rebranding the whole corporation around intelligent spaces in 2025. The stack: Distech building controls, the Atrius data platform, and QSC audio/video (a major 2024 acquisition). The Acuity Intelligent Spaces segment grew 44.7% in Q3 FY2026 to $248M and is pushing into data-center controls for hyperscalers.",
+  problem:"The core lighting business is treading water — total company sales grew just 2% in tepid markets — so <b>all the growth lives in the software layer</b>, which must be continuously fed with new adjacencies to keep compounding. Ashe's 'intelligent edge' thesis is bigger than one company can build: buildings throw off enormous sensor data (occupancy, energy, environment) that today mostly powers controls, not products. Every adjacency they enter (data centers via QSC/Distech was the latest) they've had to buy or build slowly in-house. The gap is product-creation velocity: platform in place, more product surface than internal bandwidth.",
+  evidence:[
+    {src:"Q3 FY2026 results &middot; Jun 2026", q:"Intelligent Spaces revenue +44.7% to $248.1M (QSC integration, surging Distech/Atrius demand); expansion into data-center controls serving hyperscalers; AI and new technology cited for future margin gains and competitive position.", why:"A software platform hungry for adjacencies — ready-made distribution for a co-built building-intelligence venture.", link:"https://www.investing.com/news/company-news/acuity-brands-q3-fy2026-slides-intelligent-spaces-drives-growth-93CH-4760773"},
+    {src:"Q3 FY2026 highlights &middot; Jun 2026", q:"Net sales $1.2B (+2%) with adjusted EPS $5.31 (+4%), beating expectations — record profitability squeezed from tepid core markets while AIS carries growth.", why:"The math is stark: flat core, surging software — leadership must keep feeding the software layer.", link:"https://finance.yahoo.com/markets/stocks/articles/acuity-inc-ayi-q3-2026-190031641.html"},
+    {src:"'From Light Fixtures to the Intelligent Edge' deep dive &middot; Jan 2026", q:"Chronicles the transformation: Ashe's 2020 arrival, the 2025 corporate rebrand around intelligent spaces, and the strategy of using digital and PLC controllers to enter higher-growth verticals like data centers ahead of legacy competitors.", why:"A documented decade-long pivot — the 'intelligent spaces' thesis is the company's identity now, and ventures that extend it extend the CEO's legacy.", link:"https://markets.financialcontent.com/wral/article/predictstreet-2026-1-8-acuity-brands-ayi-deep-dive-from-light-fixtures-to-the-intelligent-edge"}],
+  ventureName:"Building-data monetization venture",
+  venture:"A startup that turns Distech/Atrius building-sensor data into standalone intelligence products: occupancy-driven energy optimization, automated carbon/ESG reporting, space-utilization analytics for corporate real estate — sold beyond Acuity's install base, with Acuity as platform partner and first customer. The wedge: buildings are being forced (by energy prices and carbon rules) to prove efficiency, and the sensor layer Acuity already installed is the evidence source. For Ashe, it's product velocity without headcount; for the venture, every intelligent building is the market.",
+  approach:[
+    "Ashe is the most tech-native CEO on the list (Google, CBS Interactive) — pitch product strategy and platform economics, not industrials talk.",
+    "The hook: 'Intelligent Spaces grew 45% — your constraint is how many products you can build at once. We build companies. Let's point one at your platform.'",
+    "Route technical diligence through the Distech/Atrius organization — the venture consumes their APIs and strengthens their platform story internally.",
+    "Visibility windows: quarterly earnings calls plus NeoCon and LightFair (the commercial-building industry's main stages) — monitor for Acuity keynotes."],
+  people:[
+    {n:"Neil Ashe", t:"Chairman, President & CEO", w:"Ex-Google; drove the software pivot — speaks venture language natively; the thesis is his legacy."},
+    {n:"Karen Holcom", t:"SVP & CFO", w:"Capital gate for adjacencies; record profitability funds them."}]
+},
+{ id:"hubb", name:"Hubbell", sector:"Diversified / Electrical", rev:"$5.6B", hq:"Shelton, CT",
+  tagline:"Electrical infrastructure for the grid — data-center sales up 65% and buying capacity as fast as it can.",
+  field:"Hubbell makes the physical hardware of the electrical grid: the connectors, enclosures, insulators and utility components that carry power from substation to socket, plus a fast-growing data-center power-infrastructure business. They sit at the intersection of the two biggest electrical megatrends — grid modernization (aging US infrastructure being rebuilt) and AI data-center load growth (new demand hitting the grid faster than utilities have ever seen). Q2 2026: sales $1.71B (+15%), organic growth 10%, data-center sales up ~65%. They're acquiring aggressively to keep pace: the $3B NSI deal closed in June, the $825M DMC Power deal is pending.",
+  problem:"Demand is outrunning the whole industry's ability to plan and deliver. Their utility customers face <b>load-growth forecasting chaos</b> — nobody knows where the next gigawatt of AI data-center demand will land or when, which makes grid-asset planning (what to build, where, in what order) the sector's most valuable unsolved problem. Hubbell's response so far is bolting on capacity via acquisitions. But the deeper asset is unmonetized: their products physically touch the grid edge everywhere, and the data/intelligence layer on that footprint — which assets are stressed, where load is emerging, what fails next — isn't yet a product for anyone.",
+  evidence:[
+    {src:"Q2 2026 earnings &middot; Jul 28, 2026", q:"Net sales $1.712B (+15%), organic growth 10%; grid modernization, load growth and data-center investment called out as durable megatrends with 'visible demand strength' across utility and electrical markets; full-year guidance raised.", why:"Hypergrowth demand + raised guidance = capital and confidence for new capability bets.", link:"https://www.globenewswire.com/news-release/2026/07/28/3334138/0/en/Hubbell-Reports-Second-Quarter-2026-Results.html"},
+    {src:"Q2 2026 call highlights", q:"Data-center sales jumped ~65% in Q2; the $3B NSI acquisition closed in June and the $825M DMC Power acquisition targets AI-driven data-center power infrastructure.", why:"They are BUYING their way into the data-center power boom — proof they'll pay for capability they lack.", link:"https://finance.biggo.com/news/US_HUBB_2026-07-28"},
+    {src:"2026 agenda analysis (Finimize)", q:"Hubbell's grid gear and the data-center deal 'set the 2026 agenda' — the company's positioning is now explicitly about grid modernization plus AI-era load.", why:"The strategic narrative is committed; a load-intelligence venture extends it into software economics.", link:"https://finimize.com/content/hubb-asset-snapshot"}],
+  ventureName:"Grid-edge load-intelligence venture",
+  venture:"A startup doing AI load-growth forecasting and grid-asset planning for utilities: where will AI-era demand land, which assets will be stressed, what to upgrade first. Built with Hubbell's utility relationships and grid-edge product footprint as the wedge — their hardware is already where the data is. Utilities are desperate for this (their planning cycles were built for 1-2% annual load growth, not data-center step-changes), and for Hubbell, sponsoring the intelligence layer deepens every utility relationship and informs their own capacity bets. The venture sells to every utility in the country; Hubbell gets first look at demand signals worth billions in product planning.",
+  approach:[
+    "Frame around their customers' pain, not theirs: 'Your utility customers can't forecast AI-era load — the company that helps them plan wins the next decade of grid spend, and it should be built with you.'",
+    "CEO Gerben Bakker (a utility-side veteran) is the natural sponsor — pitch in utility-planning language (load curves, interconnection queues, capex prioritization).",
+    "Verify CIO Tejas Shah's exact title before outreach (public sources don't confirm it) — then engage him on the data/intelligence layer.",
+    "DistribuTECH (the utility industry's main conference, typically Q1) is the sector stage — monitor for Hubbell speaker slots and utility-customer panels."],
+  people:[
+    {n:"Gerben Bakker", t:"Chairman, President & CEO", w:"Owns the grid-modernization thesis; utility-side background means he feels the customers' planning pain."},
+    {n:"Tejas Shah", t:"CIO (title to verify)", w:"Digital/IT leader per target list — confirm role before outreach."},
+    {n:"Bill Sperry", t:"EVP & CFO", w:"Runs the acquisition engine ($3B NSI, $825M DMC) — comfortable paying for strategic capability."}]
+},
+{ id:"nvt", name:"nVent Electric", sector:"Diversified / Electrical", rev:"$3.5B", hq:"Minneapolis, MN (mgmt)", hot:true,
+  tagline:"Liquid cooling and electrical protection for AI data centers — growing 53% and racing to add capacity.",
+  field:"nVent makes electrical 'connection and protection' hardware — enclosures, power distribution, cable management — and, the part that changed everything, liquid cooling for AI data centers. Modern AI chips run so hot that air cooling fails; liquid cooling is mandatory, and nVent supplies both the 'gray space' (engineered buildings, enclosures, power connections) and 'white space' (liquid cooling, power distribution units) of the AI buildout. The numbers are extraordinary: Q1 2026 sales +53% (organic +34%), the Systems Protection segment +76%, and the Infrastructure business within it up more than 100% organically. UK-incorporated, US-managed; spun out of Pentair in 2018 under CEO Beth Wozniak, who has led it since.",
+  problem:"Their constraint isn't demand — it's <b>how fast they can manufacture</b>. They're racing to add capacity: a new Blaine, Minnesota facility ramping through the year, expansions elsewhere, and capex up 40% to ~$130M. Ramping new plants fast without yield and quality problems is one of manufacturing's hardest problems, and in a land grab like AI infrastructure, ramp speed decides market share — every quarter a line isn't at rate, a competitor takes the order. New products drove 20+ points of Q1 growth, which compounds the challenge: new products on new lines in new plants is the maximum-difficulty version of scaling.",
+  evidence:[
+    {src:"Q1 2026 earnings call &middot; Apr 2026", q:"Record Q1: sales +53% (organic +34%) on AI data-center demand; Infrastructure +100% organic; growth across gray space and white space including liquid cooling; adjusted EPS +63%.", why:"Hypergrowth with a manufacturing bottleneck — the defining constraint is ramp speed.", link:"https://www.tikr.com/blog/nvent-electric-q1-2026-earnings-revenue-surges-53-on-ai-data-center-demand"},
+    {src:"Q1 2026 call / capacity commentary", q:"New Blaine, MN facility opened and ramping through the year; capacity expansions across other facilities; capex up ~40% to ~$130M; new products contributed 20+ points of sales growth.", why:"Publicly committed to a multi-plant ramp — commissioning/yield intelligence lands exactly on this spend.", link:"https://app.dealroom.co/news/feed/nvent-posts-record-q1-2026-sales-over-1b-raises-guidance-on-ai-data-center-boom"},
+    {src:"MPR News interview with Wozniak &middot; Jun 2, 2026", q:"Wozniak on data centers and electrical-infrastructure demand driving growth — publicly narrating the capacity race and nVent's position in it.", why:"CEO is accessible and actively telling this story to media — a warm, current hook for outreach.", link:"https://www.mprnews.org/story/2026/06/02/beth-wozniak-nvent-ceo-data-centers-electrical-infrastructure-demand-driving-growth"}],
+  ventureName:"Factory-ramp intelligence for electrification manufacturers",
+  venture:"A startup that compresses new-plant ramp time: AI-driven production planning, yield-learning analytics (every defect teaches the line faster), and commissioning intelligence for manufacturers scaling into electrification and data-center demand. nVent's Blaine ramp is the proving ground and reference story. The market is everyone in the same scramble — transformer makers, switchgear plants, cooling suppliers — because the entire electrification supply chain is capacity-constrained at once. A venture that reliably cuts weeks off ramp-to-rate is worth a multiple of its cost to any of them.",
+  approach:[
+    "The hook: 'Your constraint isn't demand, it's ramp speed — we'll build the company that shortens every ramp you'll do this decade.'",
+    "CEO Beth Wozniak speaks frequently to media (MPR, June 2026) and is confirmed still Chair & CEO (your list's VERIFY flag resolved) — reference her own public narrative in outreach.",
+    "CFO Sara Zawoyski owns the $130M capex whose returns a faster ramp multiplies — the financial pitch is capex-efficiency, her exact metric.",
+    "Timing: Blaine is ramping NOW through year-end — an intervention that helps the current ramp is worth more than one pitched after it's done."],
+  people:[
+    {n:"Beth Wozniak", t:"Chair & CEO", w:"Owns the capacity-race narrative; media-accessible; VERIFY flag resolved — still in seat mid-2026."},
+    {n:"Sara Zawoyski", t:"EVP & CFO", w:"Capex returns depend on ramp speed — the venture multiplies her $130M."}]
+},
+{ id:"mas", name:"Masco", sector:"Paint & Coatings", rev:"$7.8B", hq:"Livonia, MI", leadChange:true,
+  tagline:"Behr paint and home products. New CEO from General Mills is rebuilding around brand + digital while DIY paint slumps.",
+  field:"Masco owns the brands in America's home-improvement aisles: Behr paint (sold exclusively through Home Depot), Delta faucets, Hansgrohe, and a portfolio of plumbing and decorative-products businesses. It's a consumer company wearing an industrial badge — which is exactly how new CEO Jon Nudi (July 2025, two decades at General Mills running consumer brands) is treating it. He restructured the executive committee in January 2026 and made a telling hire: Brad Hiranaga as the company's <i>first-ever</i> Chief Marketing Officer, reporting directly to him, owning brand growth, digital acceleration and 'customer capabilities.'",
+  problem:"The core consumer business is soft where it hurts: <b>Behr DIY paint sales fell high-single-digits</b> (strained consumers, inflation) while pro-painter sales grew mid-single-digits — a structural shift from DIY to pro that changes who the customer even is. Tariffs and commodity costs pressure margins (though a $95M tariff-cost windfall let them raise EPS guidance ~7%). The strategic answer — brand-building, digital marketing, DTC-style customer capabilities — requires consumer-data muscle that a building-products company has never had, which is why the CMO role had to be invented. The gap is literal: the capability they've named as central to growth doesn't exist in the building yet.",
+  evidence:[
+    {src:"Q2 2026 earnings call &middot; Jul 29, 2026", q:"Nudi: 'delivered strong results in the first half' amid a difficult macro/geopolitical backdrop; focus on 'industry-leading brands, expanded commercial capabilities, and enhanced operational excellence'; DIY paint down high-single-digits, pro paint up mid-single-digits; 2026 EPS outlook lifted ~7% after a $95M tariff windfall.", why:"A stated pivot to digital/brand with the DIY consumer slipping away — a data venture addresses both.", link:"https://finance.biggo.com/news/US_MAS_2026-07-29"},
+    {src:"Q2 2026 transcript &middot; Jul 2026", q:"Nudi on Behr: 'feel overall good about momentum,' pro paint on track up mid-single-digits, Behr team cutting cost to offset inflation; digital marketing and brand building called central to future growth.", why:"The CEO's own priority list — brand, digital, commercial capability — is the venture's product spec.", link:"https://www.investing.com/news/transcripts/earnings-call-transcript-masco-beats-q2-2026-profit-views-but-sales-miss-93CH-4820283"},
+    {src:"CMO appointment &middot; 2026", q:"Brad Hiranaga appointed Masco's first-ever Chief Marketing Officer, reporting directly to Nudi and joining the Executive Committee, to lead enterprise-wide brand growth, marketing, commercial excellence, digital acceleration and customer capabilities.", why:"Leadership change caught vs. original list — and the newly invented role IS the opening: he's building his function from zero.", link:"https://www.zoominfo.com/c/masco/23954077"}],
+  ventureName:"Home-improvement consumer-data venture",
+  venture:"A startup building the consumer-intelligence layer for home improvement: project-based demand prediction (paint purchases signal renovations — renovations signal faucets, fixtures, everything else), DIY-to-pro journey data (exactly the shift hurting Behr), and retail-media optimization for brands that sell through Home Depot's ecosystem. Masco's brand portfolio is the anchor customer and data source; every home-improvement brand facing the same DIY/pro shift is the market. For Nudi and Hiranaga, it's the consumer-data capability they've publicly committed to — acquired at venture speed instead of built over five years.",
+  approach:[
+    "Pitch CMO Hiranaga in his first year — he's building a function from scratch, needs visible wins, and has no legacy stack to defend. A co-built venture IS his capability roadmap.",
+    "Frame for Nudi in General Mills language: consumer insights, brand growth, category management, retail-media ROI — not industrial-tech talk.",
+    "Use the DIY-to-pro shift as the urgency: 'Your customer is changing identity — the company that maps that journey owns the category's next decade.'",
+    "Timing: the new exec structure (Jan 2026) means budgets and priorities are being written NOW — get in before the first annual planning cycle closes."],
+  people:[
+    {n:"Jon Nudi", t:"President & CEO (Jul 2025)", w:"Consumer-products playbook, industrial company — needs digital/data muscle fast."},
+    {n:"Brad Hiranaga", t:"Chief Marketing Officer (first ever)", w:"Owns digital acceleration; new-in-seat, function-from-zero = looking for capability and wins."},
+    {n:"Rick Westenberg", t:"VP & CFO", w:"Capital gate; tariff windfall + raised guidance give him headroom."}]
+},
+{ id:"smg", name:"Scotts Miracle-Gro", sector:"Fertilizer & Ag Inputs", rev:"$3.5B", hq:"Marysville, OH", leadChange:true, hot:true,
+  tagline:"Lawn-care leader whose brand-new CEO made his name saving $150M with AI — the warmest audience on the list.",
+  field:"Scotts sells the lawn and garden products in every big-box store: Scotts fertilizer and grass seed, Miracle-Gro plant food, Ortho pest control. It's a seasonal, weather-whipsawed consumer business — a wet spring or early frost moves hundreds of millions in sales. An era just ended here: Jim Hagedorn, CEO since 2001 and the founder-family figurehead, exited in June 2026 after nearly 40 years. His successor Nate Baxter (joined 2023, succession planned since) rose by driving technology, automation, data analytics and AI through operations — reportedly saving ~$150M. They've also divested the Hawthorne (cannabis-adjacent hydroponics) business, cut leverage below 4x for the first time in four years, and pivoted strategy to e-commerce and higher-margin brands.",
+  problem:"The declared pivot — e-commerce, DTC, higher-margin brands — demands <b>consumer-data and demand-prediction capabilities that a traditional retail-shelf company has never possessed</b>. Baxter proved AI works on the cost side ($150M); the growth side is unbuilt: nobody in the category can predict hyper-local, weather-driven demand well (the single variable that defines their year), and their consumer relationships have historically belonged to the retailers, not to Scotts. With Q3 sales up just 1% and guidance at low-single-digit growth, the new CEO visibly needs new growth engines — and his personal brand says he'll look for technological ones.",
+  evidence:[
+    {src:"CEO succession &middot; Jun 29, 2026", q:"Nate Baxter named President & CEO effective immediately; credited with spearheading 'technology, automation, data analytics and AI to deliver operational and cost efficiencies throughout the organization'; Hagedorn exits after ~40 years; fiscal 2026 outlook reaffirmed.", why:"Leadership change caught vs. original list — and the new CEO is an AI champion by documented track record.", link:"https://www.globenewswire.com/news-release/2026/06/29/3318806/33079/en/ScottsMiracle-Gro-Announces-Strategic-Leadership-Succession.html"},
+    {src:"VentureBeat feature — 'When dirt meets data'", q:"ScottsMiracle-Gro saved ~$150M using AI across its operations.", why:"Proven internal AI ROI at scale — the question 'what's next?' answers itself, and the answer should be UpLabs.", link:"https://venturebeat.com/ai/when-dirt-meets-data-scottsmiracle-gro"},
+    {src:"Q3 2026 results (8-K) &middot; Jul 2026", q:"Q3 net sales $1.17B (+1% YoY); Hawthorne divestiture completed; leverage down to 3.71x debt-to-EBITDA (first time under 4x in four years); strategy pivoting to e-commerce and higher-margin branded products; adjusted-profit guidance raised.", why:"Balance sheet repaired + modest growth = capital available and pressure for new engines simultaneously.", link:"https://www.sec.gov/Archives/edgar/data/0000825542/000082554226000036/exhibit991q3f26newsrelease.htm"}],
+  ventureName:"Weather-driven demand intelligence for consumer ag",
+  venture:"A startup predicting hyper-local, weather-driven demand for lawn/garden products — the category's defining variable — and turning it into product: e-commerce demand shaping, retail replenishment optimization (getting the right SKUs to the right stores before the weather window), and direct-consumer engagement triggered by local conditions ('your lawn needs X this week'). Scotts is the anchor customer with the category's biggest brand and data; the market is every weather-driven seasonal category (garden, pool, outdoor living, even beverages). Baxter's cost-side AI record makes this the natural sequel: growth-side AI, built as a company.",
+  approach:[
+    "Strike in Baxter's first 6 months: new CEOs buy new ideas, and this one's identity is literally 'the technology guy who modernized Scotts.'",
+    "Open with his own record: '$150M saved on the cost side — we'll build the growth-side company with you.'",
+    "Frame within the post-Hawthorne strategy: e-commerce and brand-margin growth both depend on demand intelligence they don't have.",
+    "CFO Mark Scheiwer gates the capital — the repaired balance sheet (leverage under 4x) is his signal that strategic investment is affordable again."],
+  people:[
+    {n:"Nate Baxter", t:"President & CEO (Jun 2026)", w:"AI/automation champion now in the top seat — warmest single audience on the list."},
+    {n:"Mark Scheiwer", t:"CFO", w:"Capital gate post-divestiture; deleveraged balance sheet reopens investment capacity."}]
+},
+{ id:"hwm", name:"Howmet Aerospace", sector:"Aerospace & Defense", rev:"$7.4B", hq:"Pittsburgh, PA", hot:true,
+  tagline:"Jet-engine parts in red-hot demand — held back by machine tools that take two years to arrive.",
+  field:"Howmet makes the hardest parts in aerospace: single-crystal superalloy turbine blades that survive inside jet engines, aerospace fasteners, and structural components — for commercial jets, defense platforms, and industrial gas turbines (whose demand is now also being driven by data-center power generation). This is precision manufacturing at its most extreme: castings with tolerances where a fraction of a percent of yield is serious money. Business is booming: Q1 2026 revenue +19% to $2.31B, adjusted EPS +42%, full-year guidance raised to $9.575–9.725B revenue with ~$500M of capex. A rival's bankruptcy (Magellan's Middletown filing) may push even more work their way.",
+  problem:"Growth is capacity-constrained in a way CEO John Plant has named with unusual precision: <b>global machine-tool lead times now exceed two years</b>. You cannot simply buy more capacity — the machines don't exist to buy. So the only way to grow into surging demand is squeezing more from existing machines: better scheduling, less downtime, higher yields, less scrap. They already use AI for manufacturing yields and traceability — proof of appetite — but that's internal engineering effort, not a systematic throughput platform. Every percentage point of utilization they can't capture is revenue handed to a supply chain that also can't deliver.",
+  evidence:[
+    {src:"Q1 2026 earnings call &middot; May 7, 2026", q:"'A very strong start to 2026': revenue $2.31B (+19%), adjusted EBITDA $740M (+32%), adjusted EPS $1.22 (+42%); demand strength across commercial aero, defense and IGT — the latter boosted by data-center energy needs; AI being incorporated to increase manufacturing yields and traceability.", why:"Surging demand + AI already in use for yields = a throughput venture extends what's working.", link:"https://finance.yahoo.com/markets/stocks/articles/howmet-aerospace-q1-earnings-call-230611276.html"},
+    {src:"BoA conference / capacity commentary &middot; 2026", q:"Plant acknowledged global machine-tool lead times now exceeding two years, with the company balancing strict profitability against capacity expansion through supply-chain constraints.", why:"The named, quantified bottleneck — throughput intelligence on existing machines is worth more than machines they can't get.", link:"https://finance.yahoo.com/markets/stocks/articles/howmet-hwm-speaks-capacity-expansion-191650404.html"},
+    {src:"2026 guidance raise", q:"Full-year 2026 outlook raised: revenue $9.575–9.725B, adjusted EPS $4.88–5.00, ~$500M capex with 2027 likely higher.", why:"Committed capex + raised targets = every efficiency gain multiplies; the money exists to fund the fix.", link:"https://ts2.tech/en/howmet-aerospace-stock-jumps-hwm-raises-2026-forecast-as-jet-demand-powers-profit-beat/"}],
+  ventureName:"Machine-utilization & scheduling intelligence for precision manufacturing",
+  venture:"A startup that maximizes throughput from existing precision-machining and casting capacity: AI production scheduling (sequencing jobs to minimize changeover and idle time), predictive tool-wear (the machine-tool shortage makes every tool-hour precious), and yield-learning models that turn each scrapped part into process improvement. Howmet is first customer with the sharpest version of the problem; the market is the entire capacity-starved aerospace supply chain — hundreds of suppliers facing the same two-year machine-tool queue. When you can't buy capacity, software that finds capacity inside existing machines is the only product that matters.",
+  approach:[
+    "Lead with Plant's own constraint: 'You said machine tools take two years — we'll build the company that finds you capacity inside the machines you already own.'",
+    "Plant is a famously numbers-driven operator (the Meritor/TRW school): pitch exclusively in yield points, machine-hours recovered, and revenue per existing spindle.",
+    "Reference their existing AI-for-yields work as the foundation: this productizes and compounds what they've started internally.",
+    "His public stages: BoA industrials conferences, quarterly calls, and the Paris/Farnborough air-show cycle — time outreach to those windows."],
+  people:[
+    {n:"John Plant", t:"Executive Chairman & CEO", w:"Named the bottleneck publicly; ruthless ROI evaluator — bring numbers, not vision."},
+    {n:"Ken Giacobbe", t:"EVP & CFO", w:"Capex efficiency is his metric — throughput gains multiply his ~$500M program."}]
+},
+{ id:"cw", name:"Curtiss-Wright", sector:"Aerospace & Defense", rev:"$3.1B", hq:"Davidson, NC",
+  tagline:"Defense electronics running NVIDIA chips — a partner for AI ventures where commercial startups can't easily go.",
+  field:"Curtiss-Wright — descended from the Wright brothers' and Glenn Curtiss's original companies — makes defense and nuclear technology: ruggedized embedded computing for military platforms (now shipping NVIDIA Blackwell-based products, scaled down to battlefield size/weight/power), naval and submarine propulsion systems, and commercial nuclear components (with small-modular-reactor upside). Over half of all internal R&D goes to defense electronics. Q1 2026: sales $914M (+13%), EPS $3.48 (+23%), guidance raised, with record operating margins at or above 19% targeted — and demand aligned to every major defense priority: naval shipbuilding, submarines, tactical-aircraft modernization, radar, missile defense.",
+  problem:"Defense platforms urgently need deployable AI at the edge — radar processing, sensor fusion, autonomy, electronic warfare — and the Pentagon is funding it aggressively. But defense-grade constraints (certification, security clearances, ITAR, extreme size/weight/power limits) <b>lock most commercial AI startups out of the market entirely</b>. Curtiss-Wright has the inverse problem: they ship the NVIDIA-based hardware and hold the clearances and platform relationships, but they are not an AI-software company and can't easily hire like one. The fastest-growing layer of their own stack — the software that runs on their boards — is the layer they don't own.",
+  evidence:[
+    {src:"Q1 2026 earnings call &middot; May 2026", q:"Bamford: 'highly productive start to 2026' — revenue +13% across all three segments, EPS +23%, 100bps margin expansion, guidance raised; alignment cited with naval shipbuilding, submarine production, tactical aircraft modernization, next-gen air superiority, radar and strategic missile defense.", why:"Rising defense budgets + all-segment growth = funded platform for a software-layer venture.", link:"https://www.investing.com/news/transcripts/earnings-call-transcript-curtisswright-q1-2026-earnings-beat-expectations-93CH-4670148"},
+    {src:"Q1 2026 call — R&D commentary", q:"Over half of internal R&D is spent in the defense-electronics portfolio, with NVIDIA-based products ranging from Blackwell 5000-class down to size/weight/power-optimized variants.", why:"Massive hardware R&D with no equivalent AI-software arm — the gap a co-build fills.", link:"https://finance.yahoo.com/markets/stocks/articles/curtiss-wright-q1-earnings-call-000455597.html"},
+    {src:"Q1 2026 slides / guidance", q:"Full-year 2026 outlook raised on strength across defense, commercial nuclear and industrial markets; record profitability targeted with operating margin at or above 19%.", why:"Record-margin discipline means the venture must carry its own economics — and defense software margins do.", link:"https://www.investing.com/news/company-news/curtisswright-q1-2026-slides-strong-execution-drives-guidance-raise-93CH-4670347"}],
+  ventureName:"Defense-grade edge-AI software venture",
+  venture:"A startup building certified AI software — sensor fusion, radar processing, autonomy, EW applications — for Curtiss-Wright's NVIDIA-based embedded hardware, co-built so it clears defense procurement from birth: cleared personnel, ITAR-compliant from day one, designed against real platform constraints. Curtiss-Wright provides the hardware, clearances and channel into the primes; the venture provides the AI-software talent that defense hardware companies can't hire at market. The moat is the barrier itself: the certification and clearance wall that keeps commercial AI startups out becomes the venture's defensible position.",
+  approach:[
+    "Frame as completing their stack: 'You ship the Blackwell hardware — the software layer on top is where the next decade of program wins gets decided. Let's own it together.'",
+    "Defense procurement rewards teaming: position the venture as their AI teammate on specific program pursuits (naval combat systems, radar modernization) rather than a general capability.",
+    "Use the R&D asymmetry: half their R&D is defense electronics — an equity stake in the software layer multiplies that spend without new headcount.",
+    "Sector stages: Sea-Air-Space (April) and AUSA (October) defense shows; Bamford also presents regularly at investor days — a predictable outreach calendar."],
+  people:[
+    {n:"Lynn Bamford", t:"Chair & CEO", w:"Owns the defense-electronics R&D bet; needs the software layer to win programs."},
+    {n:"Chris Farkas", t:"VP & CFO", w:"Capital gate; record-margin discipline means the venture must show its own economics."}]
+}
+];
+
+const SECTOR_ORDER = ["Industrial Automation","Heavy Machinery","Chemicals","Paint & Coatings","Fertilizer & Ag Inputs","Diversified Industrial","Diversified / Electrical","Aerospace & Defense"];
+const SECTOR_BLURBS = {
+  "Industrial Automation":"The companies that automate everyone else's factories.",
+  "Heavy Machinery":"Trucks, mowers, compressors, kitchens — hardware giants hunting for their software layer.",
+  "Chemicals":"Process industries where yield, energy and reliability decide everything.",
+  "Paint & Coatings":"Precision chemistry at scale — where AI has already proven it pays.",
+  "Fertilizer & Ag Inputs":"Commodity + consumer ag — both mid-leadership-change, both data-hungry.",
+  "Diversified Industrial":"Software-heavy portfolios that buy and build constantly.",
+  "Diversified / Electrical":"The grid + AI data-center boom — the fastest demand growth on the list.",
+  "Aerospace & Defense":"Capacity-starved precision manufacturing and defense-grade AI."
+};
+
+/* ============================================================
+   C-SUITE — researched 5 Sept 2026 from company leadership /
+   IR governance pages and dated press releases.
+   conf: "high"   = confirmed on the company's own page or a press release
+         "med"    = consistent across secondary sources, not yet on a primary page
+         "check"  = not yet verified — treat as a lead, not a fact
+   Every absence is stated explicitly. Blank never means "unknown".
+   ============================================================ */
+const CSUITE = {
+ cf:{ src:"https://www.cfindustries.com/who-we-are/senior-leadership",
+  CEO:{n:"Chris Bohn",t:"President & Chief Executive Officer",since:"Jan 2026",bg:"Promoted from COO; previously CFO. Operations is his home turf — reliability is his legacy issue.",conf:"high"},
+  CFO:{n:"Andrew T. Scribner",t:"EVP & Chief Financial Officer",since:"May 2026",bg:"Elected EVP & CFO in 2026. Underwrites the ~$1.3B/yr capex programme.",conf:"high"},
+  COO:null, CSO:null,
+  note:"No COO and no Chief Strategy or Sustainability Officer. Manufacturing sits with Trevor Williams (SVP, Manufacturing & Distribution); the decarbonisation agenda sits with Erik Mayer (VP, Clean Energy & BD) — he is the de facto sustainability sponsor.",
+  others:[{n:"Erik M. Mayer",t:"VP, Clean Energy & Business Development",w:"Owns Blue Point and the decarbonisation agenda — sponsor for anything protecting that spend."},
+          {n:"Trevor Williams",t:"SVP, Manufacturing & Distribution",w:"Owns plant reliability — the Yazoo City problem is his to fix."},
+          {n:"Bert Frost",t:"EVP & Chief Commercial Officer",w:"Owns the gas-price/margin exposure on the sales side."}]},
+
+ osk:{ src:"https://www.oshkoshcorp.com/story/leadership",
+  CEO:{n:"John C. Pfeifer",t:"President & Chief Executive Officer",since:"2021",bg:"Champions the autonomy/AI vision; acquires capability rather than building it (Canvas).",conf:"high"},
+  CFO:{n:"Matthew Field",t:"EVP & Chief Financial Officer",since:"Jan 2025",bg:"Owns the tariff-neutrality promise made to investors — the economic buyer for cost intelligence.",conf:"high"},
+  COO:null,
+  CSO:{n:"Jay Iyengar",t:"EVP & Chief Technology and Strategic Sourcing Officer",since:"",bg:"Nearest thing to a strategy chief — and sourcing is exactly where the $200M tariff problem lives.",conf:"high"},
+  note:"No COO. Strategy is split: Jay Iyengar holds technology + strategic sourcing; the three segment presidents (Access, Transport, Vocational) run operations directly.",
+  others:[{n:"Anupam Khare",t:"SVP & Chief Information/Digital Officer",w:"Runs a real AI & data-science practice — the most natural entry point on the whole list."},
+          {n:"Michael E. Pack",t:"EVP & President, Vocational",w:"Owns the segment with the admitted 'operational disruptions'."},
+          {n:"Mahesh Narang",t:"EVP & President, Access",w:"Owns JLG and the Canvas autonomy bet."}]},
+
+ ttc:{ src:"https://www.thetorocompany.com/corporate-governance/management",
+  CEO:{n:"Richard M. Olson",t:"Chairman & Chief Executive Officer",since:"2016",bg:"Said publicly that customers are still 'figuring out how to incorporate autonomous solutions'. Hands over 1 Nov 2026.",conf:"high"},
+  CFO:{n:"Angela C. Drake",t:"VP & Chief Financial Officer",since:"",bg:"Owns the ~$120M tariff run-rate and the inventory/forecasting gap.",conf:"high"},
+  COO:{n:"Edric C. Funk",t:"President & Chief Operating Officer",since:"",bg:"ELECTED CEO EFFECTIVE 1 NOVEMBER 2026. The single best-timed target on this list.",conf:"high"},
+  CSO:null,
+  note:"No Chief Strategy or Sustainability Officer. CEO transition is the story: Edric Funk moves from President & COO to CEO on 1 Nov 2026 — a brand-new CEO inheriting an autonomy-adoption problem he already owns operationally.",
+  others:[{n:"Kurt D. Svendsen",t:"VP, Technology",w:"Owns the autonomous/smart-connected product layer where adoption is stalling."},
+          {n:"Grant M. Young",t:"Group VP, Golf, Grounds and Irrigation",w:"Golf courses are exactly where robot mowers demo but don't deploy."}]},
+
+ axta:{ src:"https://ir.axalta.com/company-information/executive-team",
+  CEO:{n:"Chris Villavarayan",t:"Chief Executive Officer & President",since:"2024",bg:"Outside hire; ran Meritor previously. Brought an operator's lens to a chemistry company.",conf:"high"},
+  CFO:{n:"Carl Anderson",t:"SVP & Chief Financial Officer",since:"",bg:"Capital gate for the AkzoNobel transaction and the cost programme.",conf:"high"},
+  COO:null,
+  CSO:{n:"Mark Dixon",t:"SVP, Operational Excellence & Chief Procurement Officer",since:"",bg:"Closest functional equivalent — owns the operational-excellence agenda.",conf:"high"},
+  note:"No COO and no Chief Strategy/Sustainability Officer. Operations run through three business presidents (Mobility, Industrial, Refinish) plus Mark Dixon on operational excellence.",
+  others:[{n:"Robert Roop",t:"SVP & Chief Technology Officer",w:"Owns colour science and the TintMaster AI work — the technical champion."},
+          {n:"Troy Weaver",t:"President, Global Refinish",w:"Refinish is where the colour-matching AI actually earns money."}]},
+
+ rok:{ src:"https://www.rockwellautomation.com/en-us/company/investor-relations/governance/executive-leadership.html",
+  CEO:{n:"Blake Moret",t:"Chairman & Chief Executive Officer",since:"2016",bg:"Long-tenured; has staked Rockwell on software-defined automation.",conf:"high"},
+  CFO:{n:"Christian Rothe",t:"SVP & Chief Financial Officer",since:"2023",bg:"Runs the margin-expansion programme underwriting the software pivot.",conf:"high"},
+  COO:null,
+  CSO:{n:"Veena Lakkundi",t:"SVP, Corporate Strategy & Development",since:"",bg:"Owns strategy and M&A — the person who decides whether Rockwell builds, buys or partners.",conf:"high"},
+  note:"No COO. Rockwell runs three business SVPs (Software & Control, Intelligent Devices, Lifecycle Services) instead. Two strategy roles exist — Veena Lakkundi (SVP Corporate Strategy & Development) and Sharon Van Zeeland (VP Strategy & Corporate Development).",
+  others:[{n:"Cyril Perducat",t:"SVP & Chief Technology Officer",w:"Technical sponsor for anything AI-shaped."},
+          {n:"Chris Nardecchia",t:"SVP, IT & Chief Information Officer",w:"Runs Rockwell's own data estate — a credible internal champion."},
+          {n:"Matheus Bulho",t:"SVP, Software & Control",w:"P&L owner for the software business itself."}]},
+
+ ir:{ src:"https://www.irco.com/en/company/leadership/",
+  CEO:{n:"Vicente Reynal",t:"Chairman, President & Chief Executive Officer",since:"2016",bg:"Built the employee-ownership model; 8x enterprise-value growth. Highly acquisitive.",conf:"high"},
+  CFO:{n:"Vikram Kini",t:"SVP & Chief Financial Officer",since:"2021",bg:"Runs the M&A-funded compounding model.",conf:"high"},
+  COO:null,
+  CSO:{n:"Elizabeth Meloy Hepding",t:"SVP, Corporate Development",since:"",bg:"Owns the acquisition pipeline — for a serial acquirer this is the strategy seat.",conf:"high"},
+  note:"No COO and no Chief Sustainability Officer. Ingersoll Rand runs by segment/region GMs. For a company that grows by acquisition, Corporate Development is the strategic door.",
+  others:[{n:"Matt Emmerich",t:"SVP & Chief Information Officer",w:"Owns the data layer across a very acquisitive portfolio — integration pain is his."}]},
+
+ rrx:{ src:"https://investors.regalrexnord.com/",
+  CEO:{n:"Aamir Paul",t:"Chief Executive Officer",since:"by 1 Jul 2026",bg:"NEW CEO. Came from Schneider Electric, where he ran North America ($17B+ revenue, 43,000 people). Ex-Dell. Chemical engineering at Northwestern; Booth and INSEAD.",conf:"high"},
+  CFO:null, COO:null, CSO:null,
+  note:"LEADERSHIP CHANGE — Aamir Paul replaced Louis Pinkham as CEO, no later than 1 July 2026. A brand-new outside CEO from a much larger electrical company is the single strongest cold-outreach window on this list. CFO and other C-suite roles NOT YET VERIFIED — confirm against the next proxy statement before using a name in an email.",
+  others:[]},
+
+ leco:{ src:"https://ir.lincolnelectric.com/",
+  CEO:{n:"Steven B. Hedlund",t:"Chair, President & Chief Executive Officer",since:"2024",bg:"Became CEO in 2024 and Chair after Christopher Mapes retired. Also sits on Graco's board.",conf:"high"},
+  CFO:null, COO:null, CSO:null,
+  note:"CFO and wider C-suite NOT YET VERIFIED — Lincoln Electric's leadership page blocked automated reading. Confirm from the latest proxy statement (DEF 14A) on SEC EDGAR before naming anyone.",
+  others:[]},
+
+ midd:{ src:"https://middlebycorporation.gcs-web.com/corporate-governance/management",
+  CEO:{n:"Timothy FitzGerald",t:"Chief Executive Officer",since:"2019",bg:"Long-tenured M&A operator; steering the food-processing separation.",conf:"high"},
+  CFO:{n:"Brittany Cerwin",t:"Chief Financial Officer",since:"2024",bg:"Newer in seat — new CFOs re-examine spend and vendors.",conf:"high"},
+  COO:{n:"James K. Pool III",t:"Chief Technology and Operations Officer",since:"",bg:"Combined technology + operations — the natural owner of any product-side venture.",conf:"high"},
+  CSO:null,
+  note:"No separate Chief Strategy Officer; James Pool's combined technology-and-operations remit is the closest thing to a COO. Live corporate event: the food-processing business is being separated, with Mark Salman named to lead it as CEO in 2026 — spin-offs create budget and appetite for new tooling on both sides.",
+  others:[{n:"Steve Spittle",t:"Chief Commercial Officer",w:"Owns the commercial motion across a very fragmented brand portfolio."}]},
+
+ emn:{ src:"https://www.eastman.com/en/who-we-are/our-organization/leadership",
+  CEO:{n:"Mark J. Costa",t:"Chairman & Chief Executive Officer",since:"2014",bg:"Long-tenured; has bet the company on molecular recycling.",conf:"high"},
+  CFO:{n:"William T. McLain, Jr.",t:"EVP & Chief Financial Officer",since:"2021",bg:"Capital gate for the recycling build-out.",conf:"high"},
+  COO:null,
+  CSO:{n:"Stephen G. Crawford",t:"EVP, Chief Technology and Sustainability Officer",since:"",bg:"A genuine Chief Sustainability Officer — rare on this list, and combined with the CTO role. For a circular-economy pitch he is the single right door.",conf:"high"},
+  note:"One of only two companies here with a real sustainability chief in the C-suite. No COO — manufacturing sits with Michelle Caveness (SVP & Chief Manufacturing Officer).",
+  others:[{n:"Michelle H. Caveness",t:"SVP & Chief Manufacturing Officer",w:"Owns plant performance and energy intensity."},
+          {n:"Brad A. Lich",t:"EVP & Chief Commercial Officer",w:"Owns the specialty-margin story."}]},
+
+ alb:{ src:"https://www.albemarle.com/",
+  CEO:{n:"Kent Masters",t:"Chairman & Chief Executive Officer",since:"2020",bg:"Steering Albemarle through the lithium price collapse. Moves to Executive Chairman on 1 Feb 2027.",conf:"high"},
+  CFO:null, COO:null, CSO:null,
+  note:"ANNOUNCED SUCCESSION — Ragnar 'Rag' Udd becomes CEO on 1 FEBRUARY 2027, arriving from BHP where he is Chief Commercial Officer (previously President, BHP Americas). Kent Masters becomes Executive Chairman through the 2027 AGM. This is a dated, known future window: an incoming CEO from a mining major will be forming his agenda in Q1 2027. CFO not yet verified.",
+  others:[{n:"Ragnar 'Rag' Udd",t:"Chief Executive Officer designate (from 1 Feb 2027)",w:"25+ years in global resources; currently Chief Commercial Officer at BHP. Approach in Q1 2027, not before."}]},
+
+ esi:{ src:"https://www.elementsolutionsinc.com/",
+  CEO:{n:"Benjamin Gliklich",t:"Chief Executive Officer",since:"2019",bg:"Young, finance-trained CEO of a specialty-chemicals compounder.",conf:"high"},
+  CFO:{n:"Carey Dorman",t:"Chief Financial Officer & President, Enterprise Operations",since:"",bg:"Holds finance and enterprise operations together — an unusually wide remit and a single decision-maker.",conf:"med"},
+  COO:null, CSO:null,
+  note:"No COO — Carey Dorman's 'President, Enterprise Operations' half covers it. No sustainability or strategy chief; Varun Gokarn (VP, Strategy and Integration) handles strategy below C-level and is also the investor contact.",
+  others:[{n:"Varun Gokarn",t:"VP, Strategy and Integration",w:"Strategy plus investor contact — an unusually accessible first door."},
+          {n:"Richard L. Fricke",t:"President, Electronics",w:"Owns the segment riding the AI/data-centre demand."}]},
+
+ ftv:{ src:"https://investors.fortive.com/",
+  CEO:{n:"Olumide Soroye",t:"President & Chief Executive Officer",since:"30 Jun 2025",bg:"Took over the day the Ralliant separation completed. Still relatively new — building his own agenda.",conf:"high"},
+  CFO:null, COO:null, CSO:null,
+  note:"Fortive completed the Ralliant spin-off on 30 June 2025 and Olumide Soroye became CEO the same day. A newly-separated company with a newish CEO is unusually open to outside ideas. CFO not yet verified — confirm from the latest 10-K before naming.",
+  others:[]},
+
+ ayi:{ src:"https://investors.acuityinc.com/corporate-governance/management",
+  CEO:{n:"Neil M. Ashe",t:"Chairman, President & Chief Executive Officer",since:"2020",bg:"Came from tech (Walmart eCommerce, CBS Interactive) — runs a lighting company like a software company.",conf:"high"},
+  CFO:{n:"Karen J. Holcom",t:"SVP & Chief Financial Officer",since:"2020",bg:"Long-standing partner to Ashe's portfolio reshaping.",conf:"high"},
+  COO:null,
+  CSO:{n:"Philippe Brzusczak",t:"SVP, Corporate Development and Strategy",since:"",bg:"Owns strategy and corporate development — the build-or-buy decision.",conf:"high"},
+  note:"Note the company is now 'Acuity Inc.', not Acuity Brands — the lighting business is one division under it. No COO; two adjacent strategy seats (Philippe Brzusczak on corporate development and strategy, Bhavani Amirthalingam on growth and transformation). Ruth Gratzke was named President of Acuity Brands Lighting in Aug 2026 — new divisional leadership is a fresh door.",
+  others:[{n:"Peter Han",t:"President, Acuity Intelligent Spaces",w:"Runs the software/AI side of the business — the closest thing to a natural buyer."},
+          {n:"Ruth Gratzke",t:"President, Acuity Brands Lighting (Aug 2026)",w:"Brand-new in seat — the most receptive senior person right now."}]},
+
+ hubb:{ src:"https://hubbell.gcs-web.com/",
+  CEO:{n:"Gerben Bakker",t:"Chairman, President & Chief Executive Officer",since:"2020",bg:"Rose through Hubbell's power business; riding the grid/data-centre demand wave.",conf:"high"},
+  CFO:{n:"Joseph Capozzoli",t:"VP & Chief Financial Officer",since:"1 Jan 2026",bg:"NEW CFO. Internal promotion — joined 2013 as Controller, later ran Electrical Solutions finance. CPA, Villanova MBA. Replaced Bill Sperry after 14 years.",conf:"high"},
+  COO:null, CSO:null,
+  note:"A 14-year CFO was replaced on 1 January 2026 — a new CFO in his first year is re-examining every line of spend, which is the best possible moment to propose something that changes the cost base.",
+  others:[]},
+
+ nvt:{ src:"https://www.nvent.com/en-us/about-nvent/executive-management",
+  CEO:{n:"Beth Wozniak",t:"Chair & Chief Executive Officer",since:"2018",bg:"Led nVent since the Pentair separation; heavy exposure to data-centre cooling demand.",conf:"high"},
+  CFO:{n:"Sara Zawoyski",t:"EVP & Chief Financial Officer",since:"2021",bg:"Consistently reported as CFO across sources — confirm on the leadership page before naming in writing.",conf:"med"},
+  COO:null, CSO:null,
+  note:"nVent's own leadership page blocked automated reading, so this is one to spot-check by hand. Mellinda Devese was appointed EVP & Chief Supply Chain Officer in 2026 — new supply-chain leadership during a demand surge is a live opening.",
+  others:[{n:"Mellinda Devese",t:"EVP & Chief Supply Chain Officer (2026)",w:"New in seat during a data-centre-driven demand surge."}]},
+
+ mas:{ src:"https://investor.masco.com/",
+  CEO:{n:"Jonathon Nudi",t:"President & Chief Executive Officer",since:"7 Jul 2025",bg:"Outside hire from General Mills, where he was Group President (Pet, International, Foodservice). 30 years in consumer packaged goods, not building products. Penn State; Kellogg MBA. Joined Masco's board in 2023.",conf:"high"},
+  CFO:{n:"Rick Westenberg",t:"VP, Chief Financial Officer & Treasurer",since:"",bg:"Continuity through the CEO transition.",conf:"med"},
+  COO:null, CSO:null,
+  note:"A CEO who came from consumer packaged goods into building products, in post since July 2025, is still importing ideas from outside the sector — unusually open to an outside-in pitch.",
+  others:[]},
+
+ smg:{ src:"https://scottsmiraclegro.gcs-web.com/",
+  CEO:{n:"Nate Baxter",t:"President & Chief Executive Officer",since:"29 Jun 2026",bg:"BRAND-NEW CEO (June 2026). Joined 2023 as EVP technology & operations, became COO, then President & COO. Before that: President of TEL U.S. (Tokyo Electron) and a long career at Intel in technology, supply chain and strategy. A semiconductor operator now running a lawn-care company.",conf:"high"},
+  CFO:null, COO:null, CSO:null,
+  note:"THE BIGGEST LEADERSHIP CHANGE ON THE LIST. Jim Hagedorn — CEO since 2001, chairman since 2003 — left the company and the board in June 2026. Pete Shumlin (former Governor of Vermont) is now chairman. A 25-year founder-figure CEO replaced by an Intel/Tokyo Electron operations executive means the entire strategy is genuinely in play. Approach now. CFO seat has also seen recent change — verify before naming.",
+  others:[]},
+
+ hwm:{ src:"https://www.howmet.com/officers/",
+  CEO:{n:"John Plant",t:"Executive Chairman & Chief Executive Officer",since:"2020",bg:"Highly regarded operator; ran TRW previously. Famously disciplined on capital.",conf:"high"},
+  CFO:{n:"Patrick Winterlich",t:"EVP & Chief Financial Officer",since:"1 Dec 2025",bg:"NEW CFO. Came from Hexcel, where he was CFO since 2017 — another aerospace-materials company, so no learning curve. Replaced Ken Giacobbe after 21 years.",conf:"high"},
+  COO:null, CSO:null,
+  note:"A 21-year finance veteran was replaced in December 2025 by an outside CFO from Hexcel. An external CFO in his first year, who already knows aerospace materials, will move faster than an internal promotion would.",
+  others:[]},
+
+ cw:{ src:"https://curtisswright.com/investor-relations/governance/executive-management",
+  CEO:{n:"Lynn M. Bamford",t:"Chair & Chief Executive Officer",since:"2021",bg:"30+ years operational experience across defence, aerospace and commercial. Took the board chair in May 2022.",conf:"high"},
+  CFO:{n:"K. Christopher Farkas",t:"EVP & Chief Financial Officer",since:"2020",bg:"Record-margin discipline — any venture must show its own economics.",conf:"high"},
+  COO:{n:"Kevin M. Rayment",t:"EVP & Chief Operating Officer",since:"2021",bg:"A real COO — one of only two on this entire list. Has run integration of multiple acquisitions.",conf:"high"},
+  CSO:{n:"John C. Watts",t:"EVP & Chief Growth Officer",since:"",bg:"'Chief Growth Officer' rather than Chief Strategy Officer — owns where the company expands next.",conf:"high"},
+  note:"The most conventionally complete C-suite on the list: a real COO and a growth/strategy chief alongside CEO and CFO. If you want a company where the four roles Sid asked for actually all exist, this is it.",
+  others:[]}
+};
+
+
+/* ============================================================
+   CALENDAR — dated windows to be in the room, researched 5 Sept 2026.
+   status: "confirmed" = date and venue verified from a primary source
+           "dated"     = a dated corporate event (transition, spin-off) — certain, not a venue
+           "monitor"   = recurring event that matters but whose 2026/27 date is NOT yet verified.
+                         Deliberately carries no date. Never invent one.
+   NOTHING in this list is a guess. If a date isn't here, it isn't known yet.
+   ============================================================ */
+const EVENTS = [
+ {id:"baird26", name:"Baird Global Industrial Conference", date:"2026-11-10", dateEnd:"2026-11-12",
+  loc:"The Ritz-Carlton, Chicago, IL", format:"Investor conference — 1x1 meetings + presentations",
+  status:"confirmed", scope:"sector",
+  who:"Senior executives from 280+ public and private industrial companies. By invitation via a Baird representative.",
+  why:"The single highest-density event of the year for this target list. If you attend one thing, this is it — several of the 20 will have executives in the building at the same time.",
+  link:"https://www.bairdconferences.com/our-conferences/2026/11/global-industrial-conference-2026/"},
+
+ {id:"autofair26", name:"Automation Fair 2026 (Rockwell)", date:"2026-11-16", dateEnd:"2026-11-19",
+  loc:"Boston, MA", format:"Rockwell's own flagship event — keynotes + expo",
+  status:"confirmed", scope:"company", cos:["rok"],
+  who:"Rockwell's senior leadership host it; Blake Moret has historically keynoted.",
+  why:"Rockwell on home turf, in presentation mode, showing what it wants to be known for. The cheapest possible way to understand their software ambitions before pitching into them.",
+  link:"https://www.rockwellautomation.com/en-us/events/automation-fair.html"},
+
+ {id:"ttc-ceo", name:"Toro CEO transition — Edric Funk becomes CEO", date:"2026-11-01",
+  loc:"Bloomington, MN", format:"Corporate leadership change",
+  status:"dated", scope:"company", cos:["ttc"],
+  who:"Edric C. Funk, currently President & COO, takes over as CEO from Richard Olson.",
+  why:"A new CEO's first 90 days are when agendas get set. Funk already owns the autonomy-adoption problem operationally — he inherits it as his own legacy issue. Time an approach for Nov 2026–Jan 2027.",
+  link:"https://www.thetorocompany.com/corporate-governance/management"},
+
+ {id:"alb-ceo", name:"Albemarle CEO transition — Ragnar Udd arrives", date:"2027-02-01",
+  loc:"Charlotte, NC", format:"Corporate leadership change",
+  status:"dated", scope:"company", cos:["alb"],
+  who:"Ragnar 'Rag' Udd arrives from BHP (Chief Commercial Officer) to replace Kent Masters, who becomes Executive Chairman.",
+  why:"A known, dated future window. An incoming CEO from a mining major will be forming his agenda through Q1 2027 — approach then, not now.",
+  link:"https://www.prnewswire.com/news-releases/albemarle-announces-ceo-succession-plan-302868256.html"},
+
+ {id:"smg-ceo", name:"Scotts Miracle-Gro — Nate Baxter already in seat", date:"2026-06-29",
+  loc:"Marysville, OH", format:"Corporate leadership change (already happened)",
+  status:"dated", scope:"company", cos:["smg"],
+  who:"Nate Baxter replaced Jim Hagedorn, CEO since 2001, who left the company and the board.",
+  why:"Happened in June 2026, so the window is open NOW and will not stay open. A 25-year founder-figure replaced by an Intel/Tokyo Electron operations executive means strategy is genuinely unsettled.",
+  link:"https://www.globenewswire.com/news-release/2026/06/29/3318806/33079/en/ScottsMiracle-Gro-Announces-Strategic-Leadership-Succession.html"},
+
+ {id:"midd-spin", name:"Middleby food-processing separation", date:"2026-12-31",
+  loc:"Elgin, IL", format:"Corporate separation — date approximate to 2026",
+  status:"dated", scope:"company", cos:["midd"],
+  who:"Mark Salman named CEO of the food-processing spin-off; Tim FitzGerald continues to lead Middleby.",
+  why:"Separations create two management teams both needing to prove a thesis, and budget freedom on both sides. Exact completion date needs confirming from Middleby's IR page.",
+  link:"https://investors.middleby.com/"},
+
+ {id:"ces27", name:"CES 2027", date:"", loc:"Las Vegas, NV", format:"Trade show — exhibits + keynotes",
+  status:"monitor", scope:"sector",
+  who:"Oshkosh and Toro both exhibited autonomy concepts at CES 2026 — both are likely to return.",
+  why:"Where these companies choose to show their autonomy story publicly. Dates for 2027 not yet confirmed here — check ces.tech before planning around it.",
+  link:"https://www.ces.tech/"},
+
+ {id:"ausa", name:"AUSA Annual Meeting", date:"", loc:"Washington, DC", format:"Defence trade show",
+  status:"monitor", scope:"company", cos:["cw","hwm","osk"],
+  who:"Defence primes and suppliers; Curtiss-Wright, Howmet and Oshkosh Defense all operate in this space.",
+  why:"Recurring autumn defence event. 2026 dates not verified here — confirm on the AUSA site before relying on it.",
+  link:"https://www.ausa.org/"},
+
+ {id:"saas", name:"Sea-Air-Space", date:"", loc:"National Harbor, MD", format:"Naval/defence exposition",
+  status:"monitor", scope:"company", cos:["cw"],
+  who:"Naval defence suppliers — Curtiss-Wright's core market.",
+  why:"Recurring spring event. Dates not verified here.",
+  link:"https://seaairspace.org/"},
+
+ {id:"earnings", name:"Quarterly earnings calls — all 20", date:"", loc:"Webcast",
+  format:"Earnings call + Q&A", status:"monitor", scope:"sector",
+  who:"CEO and CFO of every company on this list, four times a year, on the record.",
+  why:"The most reliable recurring source of admitted problems — the current dashboard's entire evidence base came from these. Each company's IR page publishes its date about three weeks ahead. This is the first thing the weekly monitor should pick up.",
+  link:""}
+];
+
+/* Region grouping — derived from HQ state so a single trip can cover several targets. */
+const REGION_OF = {
+ IL:"Midwest", WI:"Midwest", MN:"Midwest", OH:"Midwest", MI:"Midwest", IN:"Midwest", MO:"Midwest",
+ PA:"Northeast", CT:"Northeast", NY:"Northeast", MA:"Northeast", NJ:"Northeast", DE:"Northeast",
+ NC:"Southeast", GA:"Southeast", TN:"Southeast", FL:"Southeast", VA:"Southeast", SC:"Southeast",
+ TX:"South Central", OK:"South Central", LA:"South Central",
+ WA:"West", CA:"West", OR:"West", AZ:"West", CO:"West", UT:"West"
+};
+const REGION_ORDER = ["Midwest","Northeast","Southeast","South Central","West","Other"];
+const REGION_NOTE = {
+ "Midwest":"Half the target list. Chicago and Milwaukee alone put five targets within a two-hour drive — and the Baird conference in November is in Chicago.",
+ "Northeast":"Philadelphia, Pittsburgh and Connecticut. Pairs naturally with a New York investor trip.",
+ "Southeast":"Charlotte is the anchor — two targets in the same city, plus Atlanta and Kingsport within a day.",
+ "South Central":"Thin on this list, but the chemicals cluster around Houston is worth a look if the target list widens.",
+ "West":"Only Fortive in Everett, WA. Not worth a dedicated trip; fold into any West Coast travel.",
+ "Other":"HQ outside the standard state mapping — check individually."
+};
+
+
+
+/* Financials: market cap as of early Aug 2026; EBITDA = trailing-12-month (S&P Global via stockanalysis.com). "—" = pending weekly refresh. */
+const FIN = {
+ rok:{m:"$49.1B",e:"$1.87B"}, osk:{m:"$9.5B",e:"$1.04B"}, ttc:{m:"$9.4B",e:"$0.59B"}, axta:{m:"$8.1B",e:"$0.98B"},
+ cf:{m:"$17.9B",e:"$4.07B"}, ir:{m:"$34.2B",e:"$1.97B"}, rrx:{m:"$11.9B",e:"$1.21B"}, leco:{m:"$15.2B",e:"$0.87B"},
+ midd:{m:"$6.3B",e:"$0.67B"}, emn:{m:"$8.4B",e:"$1.27B"}, alb:{m:"$14.8B",e:"$0.89B"}, esi:{m:"$11.3B",e:"$0.70B (FY26 guide)"},
+ ftv:{m:"$18.4B",e:"$1.18B"}, ayi:{m:"$10.6B",e:"$0.83B"}, hubb:{m:"$27.3B",e:"$1.49B"}, nvt:{m:"$26.9B",e:"$1.06B"},
+ mas:{m:"$15.2B",e:"$1.34B"}, smg:{m:"$4.1B",e:"$0.52B"}, hwm:{m:"$113.6B",e:"$2.80B"}, cw:{m:"$26.4B",e:"$0.81B"}
+};
+/* Higher-traction alternate contacts: lower-seniority people who feel the problem daily, reply faster, and champion upward. */
+const ALT = {
+ rok:"FactoryTalk software product directors, Software & Control segment finance leads (own the memory-cost pain), and Automation Fair session speakers \u2014 mid-level, approachable in person, and able to champion internally.",
+ osk:"Khare's advanced-analytics/data-science directors, the supply-chain VP team running tariff mitigation day-to-day, and JLG's Canvas/autonomy program managers.",
+ ttc:"The GM/directors of Toro's autonomous business, golf- and landscape-segment sales leaders (they hear the adoption friction from customers directly), and the corp-dev team behind the Left Hand Robotics/TURFLYNX deals.",
+ axta:"Roop's color-science and AI team leads (the people who built TintMaster), refinish plant managers, and \u2014 once the AkzoNobel deal closes \u2014 the integration-planning office.",
+ cf:"Plant managers and reliability-engineering leads at Yazoo City/Donaldsonville (closest to the outage pain), the VP of manufacturing, and Erik Mayer's clean-energy team.",
+ ir:"The corporate-development team (they evaluate deals weekly \u2014 the natural front door), IIoT product managers, and IRX operational-excellence leads.",
+ rrx:"Dickson's own data/AI team (built RRXy and RRXGPT), e-commerce product owners, and segment-level digital leads.",
+ leco:"Automation-division GMs and applications engineers, welding-education/training leaders (living the labor shortage), and the Harris-facility automation team.",
+ midd:"The Middleby Innovation Kitchens team in Elgin (their showcase \u2014 easy to visit), connected-solutions/IoT product managers, and individual brand presidents.",
+ emn:"Noseda's digital-products team (built and sells Fluid Genius), methanolysis process engineers in Kingsport, and the circular-economy commercial team.",
+ alb:"Thompson's digital-transformation office, lithium-conversion process-engineering leads, and the cost-program PMO chasing the $100\u2013150M target.",
+ esi:"Advanced-packaging business-unit GMs (Micromax/Kuprion teams), applications engineers embedded at customer fabs, and corporate development.",
+ ftv:"The AI Center of Excellence team, operating-company product leaders (Fluke eMaint, Accruent, ServiceChannel), and the Fortive Business System office.",
+ ayi:"Distech and Atrius product leadership, the Intelligent Spaces strategy team, and data-center vertical sales leads.",
+ hubb:"Utility-solutions segment leadership, the NSI/DMC Power integration teams, and grid-automation product managers.",
+ nvt:"Blaine plant leadership and manufacturing-engineering leads (living the ramp right now), the liquid-cooling business GM, and operational-excellence teams.",
+ mas:"Hiranaga's new marketing organization (being hired now \u2014 relationships form fastest with new arrivals), Behr's digital/DTC team, and Home Depot channel managers.",
+ smg:"Baxter's former technology/ops organization (his lieutenants now run it and speak his language), e-commerce leadership, and supply-chain planning heads.",
+ hwm:"Plant managers and manufacturing-engineering directors at engine-products sites, the AI/yield project teams Plant referenced, and site continuous-improvement leads.",
+ cw:"Defense-electronics division GMs and chief engineers, BD leads who assemble program-pursuit teams, and embedded-computing product-line managers."
+};
+function esc(s){ return s; }
+/* ---- pipeline status + filters ---- */
+const FILTER = { q:"", chip:"all" };
+const STATUSES = ["Not contacted","Reached out","Meeting booked","Passed"];
+const STATUS_CLASS = {"Not contacted":"st-none","Reached out":"st-out","Meeting booked":"st-meet","Passed":"st-pass"};
+function getStatus(id){ try{ return localStorage.getItem("bdstatus_"+id)||STATUSES[0]; }catch(e){ return STATUSES[0]; } }
+function setStatus(id,s,ev){
+  if(ev) ev.stopPropagation();
+  try{ localStorage.setItem("bdstatus_"+id,s); }catch(e){}
+  renderHome();
+  const d=document.getElementById("detail");
+  if(d && !d.classList.contains("hidden")) openDetail(id,true);
+}
+function cycleStatus(id,ev){
+  if(ev) ev.stopPropagation();
+  const cur=getStatus(id);
+  setStatus(id, STATUSES[(STATUSES.indexOf(cur)+1)%STATUSES.length]);
+}
+function setChip(chip){ FILTER.chip=chip; renderHome(); }
+function matchesFilter(c){
+  const q=FILTER.q;
+  if(q && !(c.name.toLowerCase().includes(q) || c.sector.toLowerCase().includes(q) || c.tagline.toLowerCase().includes(q) || (c.ventureName||"").toLowerCase().includes(q))) return false;
+  const ch=FILTER.chip;
+  if(ch==="hot") return !!c.hot;
+  if(ch==="lead") return !!c.leadChange;
+  if(ch==="flag") return !!c.flagship;
+  if(STATUSES.includes(ch)) return getStatus(c.id)===ch;
+  return true;
+}
+function renderChips(){
+  const row=document.getElementById("chipsRow");
+  if(!row) return;
+  const chips=[["all","All"],["hot","Hot leads"],["lead","Leadership \u0394"],["flag","Flagship"]].concat(STATUSES.map(s=>[s,s]));
+  row.innerHTML = chips.map(([k,label])=>'<button class="fchip'+(FILTER.chip===k?' on':'')+'" onclick="setChip(\''+k.replace(/'/g,"\\'")+'\')">'+label+'</button>').join('');
+}
+let firstRender = true;
+function renderHome(){
+  const box = document.getElementById("sectors");
+  renderChips();
+  let html = ""; let shown=0; let cardIdx=0;
+  for(const sec of SECTOR_ORDER){
+    const comps = DATA.filter(c=>c.sector===sec && matchesFilter(c));
+    if(!comps.length) continue;
+    shown += comps.length;
+    html += '<div class="sector"><h2>'+sec+' &mdash; <span style="text-transform:none;font-weight:400;letter-spacing:0">'+SECTOR_BLURBS[sec]+'</span></h2><div class="grid">';
+    for(const c of comps){
+      const st=getStatus(c.id);
+      const animAttr = firstRender ? ' anim" style="animation-delay:'+(Math.min(cardIdx++,14)*45)+'ms' : '';
+      html += '<div class="card'+animAttr+'" onclick="openDetail(\''+c.id+'\')">'
+        + '<div class="top"><h3>'+c.name+'</h3><span class="rev">'+c.rev+'</span></div>'
+        + '<div class="desc">'+c.tagline+'</div>'
+        + '<div class="badges">'
+        + '<span class="chip stchip '+STATUS_CLASS[st]+'" onclick="cycleStatus(\''+c.id+'\',event)" title="Click to change status">'+st+'</span>'
+        + '<span class="chip sec">'+c.hq+'</span>'
+        + (c.flagship?'<span class="chip deep">Flagship deep dive</span>':'')
+        + (c.leadChange?'<span class="chip lead">Leadership changed</span>':'')
+        + (c.hot?'<span class="chip hot">Hot lead</span>':'')
+        + '</div><div class="cta">Open deep dive &rarr;</div></div>';
+    }
+    html += '</div></div>';
+  }
+  box.innerHTML = shown ? html : '<div class="nomatch">No companies match — clear the search or pick a different filter.</div>';
+  firstRender = false;
+}
+function openDetail(id,noScroll){
+  const c = DATA.find(x=>x.id===id);
+  if(!c) return;
+  const st=getStatus(c.id);
+  let h = '<button class="back" onclick="goHome()">&larr; All companies</button>'
+    + (function(){
+        var li = COMPANY_LIST.find(function(x){ return x.n===c.name; });
+        var isPriv = li && li.t==='private';
+        var tick = (li && !isPriv) ? li.t : null;
+        var chips = (tick ? '<span class="idchip">'+tick+'</span>' : '')
+          + (isPriv ? '<span class="idchip priv">PRIVATE</span>' : '<span class="idchip pub">PUBLIC</span>')
+          + '<span class="idchip">'+c.sector+'</span>';
+        var f = FIN[c.id]||{};
+        var strip = '<div class="statstrip">'
+          + '<div class="fs"><div class="l">HQ</div><div class="v">'+c.hq+'</div></div>'
+          + '<div class="fs"><div class="l">Revenue</div><div class="v">'+c.rev+'</div></div>'
+          + '<div class="fs"><div class="l">EBITDA (ttm)</div><div class="v">'+(f.e||'\u2014')+'</div></div>'
+          + '<div class="fs"><div class="l">Market cap</div><div class="v">'+(f.m||'\u2014')+'</div></div>'
+          + '</div>';
+        return '<div class="dhead"><div class="dh-top"><h1>'+c.name+'</h1><div class="idchips">'+chips+'</div></div>'+strip;
+      })()
+    + '<div class="angle"><b>The angle in one line:</b> '+c.tagline+'</div></div>';
+  h += '<div class="panel"><h2>Outreach status</h2><div class="stbtns">'
+    + STATUSES.map(s=>'<button class="stbtn'+(s===st?' on '+STATUS_CLASS[s]:'')+'" onclick="setStatus(\''+c.id+'\',\''+s+'\')">'+s+'</button>').join('')
+    + '</div></div>';
+  h += '<div class="panel"><h2>What they actually do</h2><p>'+c.field+'</p></div>';
+  h += '<div class="panel"><h2>Where they are lacking &mdash; in plain English</h2><p>'+c.problem+'</p></div>';
+  h += '<div class="panel"><h2>Evidence from earnings reports & public records</h2>';
+  for(const e of c.evidence){
+    h += '<div class="ev"><div class="src">'+e.src+'</div><div class="q">'+e.q+'</div><div class="why">Why it matters: '+e.why+'</div><a href="'+e.link+'" target="_blank" rel="noopener">Source &rarr;</a></div>';
+  }
+  h += '</div>';
+  h += '<div class="venture"><h2>The company UpLabs would create</h2><div class="vname">'+c.ventureName+'</div><p>'+c.venture+'</p></div>';
+  h += '<div class="panel"><h2>How to get in the room — ideally</h2><ul class="steps">';
+  c.approach.forEach((s,i)=>{ h += '<li><span class="n">'+(i+1)+'</span><span>'+s+'</span></li>'; });
+  h += '</ul>';
+  if(ALT[c.id]) h += '<div style="border-top:1px dashed var(--line);margin-top:6px;padding-top:14px"><div style="font-size:11.5px;text-transform:uppercase;letter-spacing:.13em;font-weight:700;color:var(--muted);margin-bottom:8px">If the top door doesn\'t open — higher-traction alternates</div><p style="font-size:13.5px">'+ALT[c.id]+' <span style="color:var(--muted)">These people feel the problem daily, respond far more often than C-suite cold outreach, and become the internal champion who gets you the exec meeting.</span></p></div>';
+  h += '</div>';
+  h += renderCSuite(c);
+  h += companyEvents(c);
+  h += '<div class="panel"><h2>Who to approach first &mdash; and the line to take</h2><div class="people">';
+  for(const p of c.people){ h += '<div class="person"><b>'+p.n+'</b><div class="t">'+p.t+'</div><div class="w">'+p.w+'</div></div>'; }
+  h += '</div></div>';
+  document.getElementById("detail").innerHTML = noScroll ? h : '<div class="view-anim">'+h+'</div>';
+  document.getElementById("home").classList.add("hidden");
+  document.getElementById("detail").classList.remove("hidden");
+  if(!noScroll) window.scrollTo(0,0);
+}
+function goHome(){
+  const home=document.getElementById("home");
+  document.getElementById("detail").classList.add("hidden");
+  home.classList.remove("hidden");
+  try{ home.classList.remove("view-anim"); void home.offsetWidth; home.classList.add("view-anim"); }catch(e){}
+  window.scrollTo(0,0);
+}
+
+/* ============ v2 RENDERERS: C-suite, calendar, regions ============ */
+
+/* LinkedIn: we never scrape and never guess a profile URL. We build a SEARCH
+   link. Sid clicks it while logged in and LinkedIn itself shows the degree of
+   connection and any shared connections — which is exactly what he asked for,
+   with no Terms-of-Service exposure. */
+function liSearch(name, company){
+  return "https://www.linkedin.com/search/results/people/?keywords="
+    + encodeURIComponent(name + " " + company);
+}
+function esc(s){ return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+
+const ROLE_LABEL = { CEO:"Chief Executive", CFO:"Chief Financial Officer",
+                     COO:"Chief Operating Officer", CSO:"Strategy / Sustainability" };
+
+function slotHtml(role, p, companyName){
+  if(!p){
+    return '<div class="slot empty"><div class="rl">'+ROLE_LABEL[role]+'</div>'
+      + '<div class="none">No one holds this role.</div></div>';
+  }
+  var conf = p.conf||"check";
+  var confLabel = conf==="high" ? "verified" : (conf==="med" ? "check it" : "unverified");
+  return '<div class="slot filled">'
+    + '<span class="conf '+conf+'">'+confLabel+'</span>'
+    + '<div class="rl">'+ROLE_LABEL[role]+'</div>'
+    + '<div class="nm">'+esc(p.n)+'</div>'
+    + '<div class="ti">'+esc(p.t)+'</div>'
+    + (p.since?'<span class="since">in seat '+esc(p.since)+'</span>':'')
+    + (p.bg?'<div class="bg">'+esc(p.bg)+'</div>':'')
+    + '<div class="liwrap"><a class="libtn" target="_blank" rel="noopener" href="'
+      + liSearch(p.n, companyName)+'"><span class="lin">in</span> Find on LinkedIn &rarr;</a></div>'
+    + '</div>';
+}
+
+function renderCSuite(c){
+  var cs = CSUITE[c.id];
+  if(!cs) return '';
+  var h = '<div class="panel"><h2>The C-suite</h2>';
+  h += '<div class="csuite">';
+  ["CEO","CFO","COO","CSO"].forEach(function(r){ h += slotHtml(r, cs[r], c.name); });
+  h += '</div>';
+  if(cs.note) h += '<div class="gapnote"><b>Read this before you email anyone:</b> '+cs.note+'</div>';
+  if(cs.others && cs.others.length){
+    h += '<div style="margin-top:16px"><div style="font-size:11.5px;text-transform:uppercase;letter-spacing:.13em;font-weight:700;color:var(--muted);margin-bottom:9px">Others worth knowing</div><div class="people">';
+    cs.others.forEach(function(p){
+      h += '<div class="person"><b>'+esc(p.n)+'</b><div class="t">'+esc(p.t)+'</div><div class="w">'+esc(p.w)+'</div>'
+        + '<div class="liwrap"><a class="libtn" target="_blank" rel="noopener" href="'+liSearch(p.n,c.name)+'"><span class="lin">in</span> LinkedIn &rarr;</a></div></div>';
+    });
+    h += '</div></div>';
+  }
+  h += '<div class="liexplain"><b>How the LinkedIn buttons work:</b> each one opens a LinkedIn people search for that person at that company. Because you are logged in, LinkedIn itself shows you the connection degree and any shared connections &mdash; the warm-intro path &mdash; on the results page. Nothing is scraped and no profile URL is guessed, so there is no Terms-of-Service risk. For shared connections across the whole UpLabs team rather than just your own network, that needs Sales Navigator Advanced (TeamLink).</div>';
+  if(cs.src) h += '<div class="srcline">Source: <a href="'+cs.src+'" target="_blank" rel="noopener">company leadership / investor-relations page</a> &middot; checked 5 Sept 2026</div>';
+  h += '</div>';
+  return h;
+}
+
+function fmtEvDate(e){
+  if(!e.date) return '<div class="tbd">DATE<br>TBC</div>';
+  var d = new Date(e.date+"T00:00:00");
+  var mo = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"][d.getMonth()];
+  var day = d.getDate();
+  if(e.dateEnd){
+    var d2 = new Date(e.dateEnd+"T00:00:00");
+    if(d2.getMonth()===d.getMonth()) day = day+"–"+d2.getDate();
+  }
+  return '<div class="mo">'+mo+'</div><div class="dy">'+day+'</div><div class="yr">'+d.getFullYear()+'</div>';
+}
+
+function eventRow(e, showCos){
+  var cos = "";
+  if(showCos && e.cos && e.cos.length){
+    cos = e.cos.map(function(id){
+      var c = DATA.find(function(x){return x.id===id;});
+      return c ? '<a href="#" onclick="openDetail(\''+id+'\');return false;" style="color:var(--navy);font-weight:600">'+c.name+'</a>' : '';
+    }).filter(Boolean).join(", ");
+  }
+  return '<div class="evrow">'
+    + '<div class="evdate">'+fmtEvDate(e)+'</div>'
+    + '<div class="evbody">'
+    + '<h4>'+esc(e.name)+'<span class="evstat '+e.status+'">'+e.status+'</span></h4>'
+    + '<div class="evmeta">'+esc(e.loc)+(e.format?' &middot; '+esc(e.format):'')+'</div>'
+    + (cos?'<div class="evmeta">Relevant to: '+cos+'</div>':'')
+    + (e.who?'<div class="evwho">'+esc(e.who)+'</div>':'')
+    + '<div class="evwhy">'+esc(e.why)+'</div>'
+    + (e.link?'<a class="evlink" href="'+e.link+'" target="_blank" rel="noopener">Details &rarr;</a>':'')
+    + '</div></div>';
+}
+
+function renderCalendar(){
+  var box = document.getElementById("calendarPane");
+  if(!box) return;
+  var dated = EVENTS.filter(function(e){return e.date;}).sort(function(a,b){return a.date<b.date?-1:1;});
+  var undated = EVENTS.filter(function(e){return !e.date;});
+  var h = '<div class="paneintro">Every dated window to be in the room with these executives, earliest first. '
+    + '<b>Verified</b> means the date and venue came from a primary source. <b>Dated</b> means a corporate event &mdash; a CEO handover or a separation &mdash; that is certain but is not a venue you can attend. '
+    + '<b>Monitor</b> means the event matters but its date is not yet confirmed, so it deliberately carries no date rather than a guess.</div>';
+  h += '<div class="sector"><h2>Dated &mdash; <span style="text-transform:none;font-weight:400;letter-spacing:0">confirmed or certain</span></h2></div>';
+  h += dated.map(function(e){return eventRow(e,true);}).join("");
+  h += '<div class="sector" style="margin-top:26px"><h2>To monitor &mdash; <span style="text-transform:none;font-weight:400;letter-spacing:0">recurring, dates not yet confirmed</span></h2></div>';
+  h += undated.map(function(e){return eventRow(e,true);}).join("");
+  box.innerHTML = h;
+}
+
+function companyEvents(c){
+  var rel = EVENTS.filter(function(e){ return e.cos && e.cos.indexOf(c.id)>=0; });
+  var sector = EVENTS.filter(function(e){ return e.scope==="sector"; });
+  var all = rel.concat(sector);
+  if(!all.length) return '';
+  var h = '<div class="panel"><h2>Where they will be &mdash; and when</h2>';
+  h += all.map(function(e){return eventRow(e,false);}).join("");
+  h += '<div class="liexplain">Nothing here is guessed. Where a date is missing it is genuinely not confirmed yet &mdash; that is what the weekly monitor is for. The most reliable recurring window for every company on this list is its own quarterly earnings call, published on its investor-relations page about three weeks ahead.</div>';
+  h += '</div>';
+  return h;
+}
+
+function stateOf(hq){
+  var m = String(hq||"").match(/,\s*([A-Z]{2})\b/);
+  return m ? m[1] : null;
+}
+function renderRegions(){
+  var box = document.getElementById("regionsPane");
+  if(!box) return;
+  var buckets = {};
+  DATA.forEach(function(c){
+    var st = stateOf(c.hq);
+    var reg = (st && REGION_OF[st]) ? REGION_OF[st] : "Other";
+    (buckets[reg] = buckets[reg] || []).push(c);
+  });
+  var h = '<div class="paneintro">The same twenty companies grouped by where they actually are, so one trip can cover several. '
+    + 'Head-office locations &mdash; the plants and R&amp;D sites that matter for a physical visit are the obvious next layer to add.</div>';
+  REGION_ORDER.forEach(function(reg){
+    var list = buckets[reg];
+    if(!list || !list.length) return;
+    h += '<div class="regblock"><h3>'+reg+' &middot; '+list.length+' '+(list.length===1?'company':'companies')+'</h3>';
+    if(REGION_NOTE[reg]) h += '<div class="regnote">'+REGION_NOTE[reg]+'</div>';
+    h += '<div class="regrid">';
+    list.sort(function(a,b){return a.hq<b.hq?-1:1;}).forEach(function(c){
+      h += '<div class="regcard" onclick="openDetail(\''+c.id+'\')"><b>'+c.name+'</b>'
+        + '<div class="hqline">'+c.hq+'</div>'
+        + '<div class="sectline">'+c.sector+' &middot; '+c.rev+'</div></div>';
+    });
+    h += '</div></div>';
+  });
+  box.innerHTML = h;
+}
+
+/* view switching */
+var VIEW = "companies";
+function setView(v){
+  VIEW = v;
+  ["companies","calendar","regions"].forEach(function(k){
+    var pane = document.getElementById(k==="companies" ? "companiesPane" : k+"Pane");
+    var tab  = document.getElementById("tab-"+k);
+    if(pane) pane.classList.toggle("hidden", k!==v);
+    if(tab) tab.classList.toggle("on", k===v);
+  });
+  if(v==="calendar") renderCalendar();
+  if(v==="regions") renderRegions();
+  window.scrollTo(0,0);
+}
+
+renderHome();
+// dynamic counts (animated count-up)
+(function(){
+  const n=DATA.length, secs=new Set(DATA.map(c=>c.sector)).size;
+  function countUp(id,target){
+    const el=document.getElementById(id); if(!el) return;
+    if(typeof requestAnimationFrame==="undefined"||typeof performance==="undefined"){ el.textContent=target; return; }
+    const t0=performance.now(), dur=700;
+    (function step(t){
+      const p=Math.min((t-t0)/dur,1), eased=1-Math.pow(1-p,3);
+      el.textContent=Math.round(target*eased);
+      if(p<1) requestAnimationFrame(step); else el.textContent=target;
+    })(t0);
+  }
+  countUp("ccount",n); countUp("scount",n); countUp("seccount",secs);
+})();
+
+/* ================= ADD-COMPANY PICKER ================= */
+const COMPANY_LIST = [
+ {n:"RPM International",t:"RPM",hq:"Medina, OH",s:"Paint & Coatings"},
+ {n:"Benjamin Moore (Berkshire)",t:"private",hq:"Montvale, NJ",s:"Paint & Coatings"},
+ {n:"PPG Industries",t:"PPG",hq:"Pittsburgh, PA",s:"Paint & Coatings"},
+ {n:"Sherwin-Williams",t:"SHW",hq:"Cleveland, OH",s:"Paint & Coatings"},
+ {n:"Huntsman",t:"HUN",hq:"The Woodlands, TX",s:"Chemicals"},
+ {n:"Olin",t:"OLN",hq:"Clayton, MO",s:"Chemicals"},
+ {n:"Chemours",t:"CC",hq:"Wilmington, DE",s:"Chemicals"},
+ {n:"Celanese",t:"CE",hq:"Irving, TX",s:"Chemicals"},
+ {n:"Cabot",t:"CBT",hq:"Boston, MA",s:"Chemicals"},
+ {n:"FMC Corporation",t:"FMC",hq:"Philadelphia, PA",s:"Chemicals / Ag"},
+ {n:"H.B. Fuller",t:"FUL",hq:"St. Paul, MN",s:"Chemicals"},
+ {n:"Avient",t:"AVNT",hq:"Avon Lake, OH",s:"Chemicals"},
+ {n:"Tronox",t:"TROX",hq:"Stamford, CT",s:"Chemicals"},
+ {n:"Ashland",t:"ASH",hq:"Wilmington, DE",s:"Chemicals"},
+ {n:"Stepan",t:"SCL",hq:"Northbrook, IL",s:"Chemicals"},
+ {n:"NewMarket",t:"NEU",hq:"Richmond, VA",s:"Chemicals"},
+ {n:"Ecolab",t:"ECL",hq:"St. Paul, MN",s:"Chemicals"},
+ {n:"Mosaic",t:"MOS",hq:"Tampa, FL",s:"Fertilizer"},
+ {n:"Nutrien",t:"NTR",hq:"Saskatoon, SK (US-listed)",s:"Fertilizer"},
+ {n:"Corteva",t:"CTVA",hq:"Indianapolis, IN",s:"Ag Inputs"},
+ {n:"Dover",t:"DOV",hq:"Downers Grove, IL",s:"Machinery"},
+ {n:"Terex",t:"TEX",hq:"Norwalk, CT",s:"Machinery"},
+ {n:"Flowserve",t:"FLS",hq:"Irving, TX",s:"Machinery / Flow"},
+ {n:"Timken",t:"TKR",hq:"North Canton, OH",s:"Machinery"},
+ {n:"Chart Industries",t:"GTLS",hq:"Ball Ground, GA",s:"Machinery"},
+ {n:"Hyster-Yale",t:"HY",hq:"Cleveland, OH",s:"Machinery"},
+ {n:"Donaldson",t:"DCI",hq:"Bloomington, MN",s:"Machinery / Filtration"},
+ {n:"ITT",t:"ITT",hq:"Stamford, CT",s:"Machinery / Flow"},
+ {n:"Gates Industrial",t:"GTES",hq:"Denver, CO",s:"Machinery"},
+ {n:"IDEX",t:"IEX",hq:"Northbrook, IL",s:"Machinery / Flow"},
+ {n:"Nordson",t:"NDSN",hq:"Westlake, OH",s:"Machinery"},
+ {n:"Watts Water Technologies",t:"WTS",hq:"North Andover, MA",s:"Machinery / Flow"},
+ {n:"Graco",t:"GGG",hq:"Minneapolis, MN",s:"Machinery"},
+ {n:"Manitowoc",t:"MTW",hq:"Milwaukee, WI",s:"Machinery"},
+ {n:"Kennametal",t:"KMT",hq:"Pittsburgh, PA",s:"Machinery"},
+ {n:"Crane Company",t:"CR",hq:"Stamford, CT",s:"Machinery / Aero"},
+ {n:"Wabtec",t:"WAB",hq:"Pittsburgh, PA",s:"Machinery / Rail"},
+ {n:"Caterpillar",t:"CAT",hq:"Irving, TX",s:"Machinery"},
+ {n:"Deere & Company",t:"DE",hq:"Moline, IL",s:"Machinery / Ag"},
+ {n:"Cummins",t:"CMI",hq:"Columbus, IN",s:"Machinery / Engines"},
+ {n:"Stanley Black & Decker",t:"SWK",hq:"New Britain, CT",s:"Tools"},
+ {n:"Snap-on",t:"SNA",hq:"Kenosha, WI",s:"Tools"},
+ {n:"TransDigm Group",t:"TDG",hq:"Cleveland, OH",s:"Aerospace"},
+ {n:"HEICO",t:"HEI",hq:"Hollywood, FL",s:"Aerospace"},
+ {n:"Moog",t:"MOG.A",hq:"East Aurora, NY",s:"Aerospace"},
+ {n:"Woodward",t:"WWD",hq:"Fort Collins, CO",s:"Aerospace"},
+ {n:"Leonardo DRS",t:"DRS",hq:"Arlington, VA",s:"Aerospace / Defense"},
+ {n:"BWX Technologies",t:"BWXT",hq:"Lynchburg, VA",s:"Aerospace / Nuclear"},
+ {n:"AAR Corp",t:"AIR",hq:"Wood Dale, IL",s:"Aerospace / MRO"},
+ {n:"L3Harris Technologies",t:"LHX",hq:"Melbourne, FL",s:"Defense"},
+ {n:"Textron",t:"TXT",hq:"Providence, RI",s:"Aerospace / Defense"},
+ {n:"AMETEK",t:"AME",hq:"Berwyn, PA",s:"Diversified"},
+ {n:"Carlisle Companies",t:"CSL",hq:"Scottsdale, AZ",s:"Diversified / Building"},
+ {n:"Pentair",t:"PNR",hq:"Golden Valley, MN",s:"Diversified / Water"},
+ {n:"A.O. Smith",t:"AOS",hq:"Milwaukee, WI",s:"Diversified / Water"},
+ {n:"Xylem",t:"XYL",hq:"Washington, DC",s:"Water Technology"},
+ {n:"Emerson Electric",t:"EMR",hq:"St. Louis, MO",s:"Automation"},
+ {n:"Eaton",t:"ETN",hq:"Dublin (US-managed)",s:"Electrical"},
+ {n:"Parker Hannifin",t:"PH",hq:"Cleveland, OH",s:"Motion & Control"},
+ {n:"Illinois Tool Works",t:"ITW",hq:"Glenview, IL",s:"Diversified"},
+ {n:"Honeywell",t:"HON",hq:"Charlotte, NC",s:"Diversified"},
+ {n:"Generac",t:"GNRC",hq:"Waukesha, WI",s:"Electrical / Power"},
+ {n:"Vertiv",t:"VRT",hq:"Westerville, OH",s:"Data-Center Infrastructure"},
+ {n:"Trane Technologies",t:"TT",hq:"Davidson, NC",s:"HVAC"},
+ {n:"Carrier Global",t:"CARR",hq:"Palm Beach Gardens, FL",s:"HVAC"},
+ {n:"Johnson Controls",t:"JCI",hq:"Cork (US-managed)",s:"Buildings"},
+ {n:"Rockwell Automation",t:"ROK",hq:"Milwaukee, WI",s:"Automation"},
+ {n:"Oshkosh",t:"OSK",hq:"Oshkosh, WI",s:"Machinery"},
+ {n:"The Toro Company",t:"TTC",hq:"Bloomington, MN",s:"Machinery"},
+ {n:"Axalta Coating Systems",t:"AXTA",hq:"Philadelphia, PA",s:"Paint & Coatings"},
+ {n:"CF Industries",t:"CF",hq:"Northbrook, IL",s:"Fertilizer"},
+ {n:"Ingersoll Rand",t:"IR",hq:"Davidson, NC",s:"Machinery"},
+ {n:"Regal Rexnord",t:"RRX",hq:"Milwaukee, WI",s:"Machinery"},
+ {n:"Lincoln Electric",t:"LECO",hq:"Cleveland, OH",s:"Machinery"},
+ {n:"Middleby",t:"MIDD",hq:"Elgin, IL",s:"Machinery"},
+ {n:"Eastman Chemical",t:"EMN",hq:"Kingsport, TN",s:"Chemicals"},
+ {n:"Albemarle",t:"ALB",hq:"Charlotte, NC",s:"Chemicals"},
+ {n:"Element Solutions",t:"ESI",hq:"Miami, FL",s:"Chemicals"},
+ {n:"Fortive",t:"FTV",hq:"Everett, WA",s:"Diversified"},
+ {n:"Acuity Brands",t:"AYI",hq:"Atlanta, GA",s:"Lighting & Controls"},
+ {n:"Hubbell",t:"HUBB",hq:"Shelton, CT",s:"Electrical"},
+ {n:"nVent Electric",t:"NVT",hq:"Minneapolis, MN",s:"Electrical"},
+ {n:"Masco",t:"MAS",hq:"Livonia, MI",s:"Paint / Building"},
+ {n:"Scotts Miracle-Gro",t:"SMG",hq:"Marysville, OH",s:"Consumer Ag"},
+ {n:"Howmet Aerospace",t:"HWM",hq:"Pittsburgh, PA",s:"Aerospace"},
+ {n:"Curtiss-Wright",t:"CW",hq:"Davidson, NC",s:"Aerospace / Defense"}
+];
+const ON_DASH = new Set(DATA.map(c=>c.name));
+const OWNER_EMAIL = "wadhera-i-23@kcs.org.uk"; // dashboard owner — receives add-requests when the page is hosted publicly
+let customQ = "";
+function escHtml(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;"); }
+
+function toggleAdd(e){
+  if(e) e.stopPropagation();
+  const m=document.getElementById("addModal");
+  if(m.classList.contains("hidden")) openAdd(); else closeAdd();
+}
+function openAdd(){
+  document.getElementById("addModal").classList.remove("hidden");
+  document.getElementById("addStep1").classList.remove("hidden");
+  document.getElementById("addStep2").classList.add("hidden");
+  const inp=document.getElementById("addSearch"); inp.value=""; filterCompanies(); inp.focus();
+}
+function closeAdd(){ document.getElementById("addModal").classList.add("hidden"); }
+document.addEventListener("keydown", function(e){ if(e.key==="Escape") closeAdd(); });
+document.addEventListener("click", function(e){
+  const m=document.getElementById("addModal");
+  if(m && !m.classList.contains("hidden") && !(e.target.closest && e.target.closest(".add-wrap"))) closeAdd();
+});
+function filterCompanies(){
+  const q=document.getElementById("addSearch").value.trim().toLowerCase();
+  const box=document.getElementById("addResults");
+  let list=COMPANY_LIST.filter(c=>!q || c.n.toLowerCase().includes(q) || c.t.toLowerCase().includes(q));
+  list.sort((a,b)=>(ON_DASH.has(a.n)?1:0)-(ON_DASH.has(b.n)?1:0) || a.n.localeCompare(b.n));
+  list=list.slice(0,12);
+  let html = list.map((c,i)=>{
+    const on=ON_DASH.has(c.n);
+    return '<div class="res'+(on?' dis':'')+'" '+(on?'':'onclick="pickCompany('+COMPANY_LIST.indexOf(c)+')"')+'>'
+      +'<div><b>'+c.n+'</b><div class="tick">'+(c.t==='private'?'Private':c.t)+' &middot; '+c.hq+' &middot; '+c.s+'</div></div>'
+      +(on?'<span class="tag">Already on dashboard</span>':'<span style="color:var(--navy);font-weight:700">&rarr;</span>')
+      +'</div>';
+  }).join('');
+  // ANY company: free-text option whenever the typed name isn't an exact list match
+  const exact = COMPANY_LIST.some(c=>c.n.toLowerCase()===q || c.t.toLowerCase()===q);
+  if(q.length>1 && !exact){
+    customQ = document.getElementById("addSearch").value.trim();
+    html += '<div class="res" onclick="pickCustom()" style="border-top:1px dashed var(--line)">'
+      +'<div><b>Research &ldquo;'+escHtml(customQ)+'&rdquo;</b><div class="tick">Not limited to the quick list — Claude will identify the exact company (public or private, any country) and research it.</div></div>'
+      +'<span style="color:var(--navy);font-weight:700">&rarr;</span></div>';
+  }
+  box.innerHTML = html;
+}
+function pickCustom(){
+  if(!customQ) return;
+  document.getElementById("addStep1").classList.add("hidden");
+  const s2=document.getElementById("addStep2");
+  s2.classList.remove("hidden");
+  s2.innerHTML='<div class="confirm-box"><b>'+escHtml(customQ)+'</b><div class="meta2">Custom entry &mdash; Claude will first confirm the exact company (and check with you if the name is ambiguous), then run the full research pipeline.</div>'
+    +'<div class="btnrow"><button class="gobtn" onclick="submitCustom()">Research &amp; add to dashboard</button>'
+    +'<button class="cancelbtn" onclick="openAdd()">Back</button></div></div>'
+    +'<div id="addStatus"></div>';
+}
+function submitCustom(){ doSubmit(buildCustomPrompt(customQ), customQ); }
+function buildCustomPrompt(name){
+  return "Add the company \""+name+"\" to the UpLabs BD Intelligence Dashboard. First identify the exact company this refers to (if the name is ambiguous, ask me to confirm before researching). "
+    +"Then run the same research pipeline as the existing companies: review their most recent earnings reports/calls (or, if private, their most recent public financial disclosures, press and trade coverage); write the plain-English 'what they do' and 'where they're lacking' sections; include 3 dated evidence items with source links and why-it-matters notes; propose the specific company UpLabs would create to solve their admitted problem (venture name + thesis with first-customer logic); write a 4-step outreach approach with named execs and timing hooks; and add people cards. "
+    +"Then update the dashboard artifact (uplabs-bd-dashboard) AND append matching rows to all 4 tabs of the tracking workbook.";
+}
+function pickCompany(idx){
+  const c=COMPANY_LIST[idx];
+  document.getElementById("addStep1").classList.add("hidden");
+  const s2=document.getElementById("addStep2");
+  s2.classList.remove("hidden");
+  s2.innerHTML='<div class="confirm-box"><b>'+c.n+'</b><div class="meta2">'+(c.t==='private'?'Private company':'Ticker: '+c.t)+' &middot; '+c.hq+' &middot; '+c.s+'</div>'
+    +'<div class="btnrow"><button class="gobtn" onclick="submitAdd('+idx+')">Research &amp; add to dashboard</button>'
+    +'<button class="cancelbtn" onclick="openAdd()">Back</button></div></div>'
+    +'<div id="addStatus"></div>';
+}
+function buildPrompt(c){
+  return "Add "+c.n+(c.t!=='private'?" ("+c.t+")":"")+" to the UpLabs BD Intelligence Dashboard. "
+    +"Run the same research pipeline as the existing companies: review their most recent earnings reports/calls and public records; write the plain-English 'what they do' and 'where they're lacking' sections; include 3 dated evidence items with source links and why-it-matters notes; propose the specific company UpLabs would create to solve their admitted problem (venture name + thesis with first-customer logic); write a 4-step outreach approach with named execs and timing hooks; and add people cards. "
+    +"Then update the dashboard artifact (uplabs-bd-dashboard) AND append matching rows to all 4 tabs of the tracking workbook.";
+}
+function submitAdd(idx){ doSubmit(buildPrompt(COMPANY_LIST[idx]), COMPANY_LIST[idx].n); }
+function doSubmit(prompt, name){
+  const status=document.getElementById("addStatus");
+  const publishNote=" When finished: update the artifact uplabs-bd-dashboard, append matching rows to all 4 tabs of the tracking workbook, save a fresh copy of the dashboard HTML as index.html in the outputs folder, and present it so the owner can redeploy the public website.";
+  // Path 1: live chat bridge (if available)
+  let sender=null;
+  try{
+    if(typeof sendPrompt==='function') sender=sendPrompt;
+    else if(window.cowork && typeof window.cowork.sendPrompt==='function') sender=window.cowork.sendPrompt;
+  }catch(e){}
+  if(sender){
+    try{
+      sender(prompt);
+      status.innerHTML='<div class="status-ok"><b>Request sent to Claude.</b> Research usually takes a few minutes; the company will appear once the update is published.</div>';
+      return;
+    }catch(e){}
+  }
+  // Path 2: Cowork automation — schedule a one-time research task that fires in ~1 minute
+  if(window.cowork && typeof window.cowork.callMcpTool==='function'){
+    status.innerHTML='<div class="status-ok">Starting automated research&hellip;</div>';
+    const tid='bd-add-'+String(name||'company').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,30)+'-'+(Date.now()%100000);
+    window.cowork.callMcpTool('mcp__scheduled-tasks__create_scheduled_task',{
+      taskId:tid,
+      description:'One-time: research and add '+String(name)+' to the UpLabs BD dashboard',
+      fireAt:new Date(Date.now()+60*1000).toISOString(),
+      prompt:prompt+publishNote,
+      notifyOnCompletion:true
+    }).then(function(r){
+      if(r && !r.isError){
+        status.innerHTML='<div class="status-ok"><b>Automated research scheduled.</b> A research run starts within a minute and adds '+escHtml(name||'the company')+' to the dashboard by itself &mdash; you\'ll get a notification when it finishes (keep the app open). Reload the dashboard afterwards to see it.</div>';
+      } else { fallbackUI(); }
+    }, function(){ fallbackUI(); });
+    return;
+  }
+  fallbackUI();
+  // Path 3: hosted website (no Claude behind the page) — email the owner
+  function fallbackUI(){
+    const claudeUrl='https://claude.ai/new?q='+encodeURIComponent(prompt);
+    const mail='mailto:'+OWNER_EMAIL+'?subject='+encodeURIComponent('BD dashboard — add company request')+'&body='+encodeURIComponent(prompt);
+    try{ navigator.clipboard.writeText(prompt); }catch(e){}
+    status.innerHTML='<div class="status-ok">'
+      +'<a href="'+mail+'" class="gobtn" style="display:inline-block;text-decoration:none;margin-bottom:8px">Send request to the dashboard team &rarr;</a>'
+      +'<br>One click \u2014 the request is pre-written and also copied to your clipboard. The company appears on this site after the next publish. '
+      +'<a href="'+claudeUrl+'" target="_blank" rel="noopener" style="color:var(--acc);font-weight:700">Prefer to run the research yourself in Claude? &rarr;</a></div>';
+  }
+}
+</script>
+</body>
+</html>
