@@ -1,0 +1,66 @@
+name: Weekly refresh checklist
+
+# Sid's brief said: don't build a scraper, build a monitor.
+# This is the zero-cost version of that. Every Monday it opens one issue
+# with the things that actually go stale, each linked to the primary source
+# so a refresh is a 20-minute job rather than a research project.
+#
+# To upgrade this into a real search agent later, add an ANTHROPIC_API_KEY
+# repository secret and have this job call the API to run the searches and
+# open the issue pre-filled with candidate hits. The staging-area principle
+# from the brief still applies: new hits land here for review, they never
+# write themselves into the dashboard.
+
+on:
+  schedule:
+    - cron: '0 8 * * 1'   # Mondays 08:00 UTC
+  workflow_dispatch:
+
+permissions:
+  issues: write
+
+jobs:
+  checklist:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const today = new Date().toISOString().slice(0,10);
+            const body = [
+              '## Weekly refresh — ' + today,
+              '',
+              'Tick what you check. Anything you change goes into `index.html` and pushes itself live.',
+              '',
+              '### 1. Leadership — the highest-value thing on this dashboard',
+              'A changed CEO or CFO is the strongest outreach signal there is, and it is also the fastest thing to go wrong.',
+              '',
+              '- [ ] Any of the 20 announced a CEO, CFO, COO or strategy-chief change this week?',
+              '- [ ] Confirm the three flagged as unverified: Regal Rexnord CFO, Lincoln Electric CFO, Fortive CFO',
+              '- [ ] Spot-check the two marked "check it": nVent CFO (Sara Zawoyski), Masco CFO (Rick Westenberg)',
+              '',
+              '### 2. Dated windows already known',
+              '- [ ] Toro — Edric Funk becomes CEO 1 Nov 2026. Approach window opens.',
+              '- [ ] Baird Global Industrial Conference — 10–12 Nov 2026, Chicago. Speaker list published yet?',
+              '- [ ] Automation Fair — 16–19 Nov 2026, Boston.',
+              '- [ ] Albemarle — Ragnar Udd starts 1 Feb 2027.',
+              '',
+              '### 3. Events still undated',
+              '- [ ] CES 2027 dates confirmed on ces.tech?',
+              '- [ ] AUSA and Sea-Air-Space 2027 dates published?',
+              '',
+              '### 4. Earnings calls',
+              '- [ ] Any of the 20 announced their next earnings date? (IR pages publish ~3 weeks ahead)',
+              '- [ ] Any new admitted problem worth adding as evidence?',
+              '',
+              '---',
+              'Opened automatically. Close it when done — a new one arrives next Monday.'
+            ].join('\n');
+
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: 'Weekly refresh — ' + today,
+              body,
+              labels: ['refresh']
+            });
