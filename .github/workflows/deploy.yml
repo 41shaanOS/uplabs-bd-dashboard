@@ -29,7 +29,7 @@ jobs:
         run: |
           test -f index.html || { echo "index.html missing"; exit 1; }
           # Fail the build rather than publish a broken page.
-          node --check <(sed -n '/^<script>$/,/^<\/script>$/p' index.html | sed '1d;$d')
+          sed -n '/^<script>$/,/^<\/script>$/p' index.html | sed '1d;$d' > /tmp/app.js && node --check /tmp/app.js
           echo "index.html present and its JavaScript parses."
 
       - uses: actions/configure-pages@v5
