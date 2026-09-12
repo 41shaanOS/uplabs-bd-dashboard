@@ -677,7 +677,8 @@ const SECTOR_BLURBS = {
 };
 
 /* ============================================================
-   C-SUITE — researched 5 Sept 2026 from company leadership /
+   C-SUITE — researched 5 Sept 2026, CFO seats completed 12 Sept 2026,
+   from company leadership /
    IR governance pages and dated press releases.
    conf: "high"   = confirmed on the company's own page or a press release
          "med"    = consistent across secondary sources, not yet on a primary page
@@ -742,14 +743,16 @@ const CSUITE = {
 
  rrx:{ src:"https://investors.regalrexnord.com/",
   CEO:{n:"Aamir Paul",t:"Chief Executive Officer",since:"by 1 Jul 2026",bg:"NEW CEO. Came from Schneider Electric, where he ran North America ($17B+ revenue, 43,000 people). Ex-Dell. Chemical engineering at Northwestern; Booth and INSEAD.",conf:"high"},
-  CFO:null, COO:null, CSO:null,
-  note:"LEADERSHIP CHANGE — Aamir Paul replaced Louis Pinkham as CEO, no later than 1 July 2026. A brand-new outside CEO from a much larger electrical company is the single strongest cold-outreach window on this list. CFO and other C-suite roles NOT YET VERIFIED — confirm against the next proxy statement before using a name in an email.",
+  CFO:{n:"Rob Rehard",t:"EVP & Chief Financial Officer",since:"",bg:"Continuity through the CEO change — he presented the Q2 2026 results alongside the incoming CEO. The person who knows where the numbers actually are.",conf:"high"},
+  COO:null, CSO:null,
+  note:"LEADERSHIP CHANGE — Aamir Paul replaced Louis Pinkham as CEO, no later than 1 July 2026. A brand-new outside CEO from a much larger electrical company is the single strongest cold-outreach window on this list. Pair him with Rob Rehard, who stayed through the transition: new CEO sets the agenda, continuing CFO knows the constraints.",
   others:[]},
 
  leco:{ src:"https://ir.lincolnelectric.com/",
   CEO:{n:"Steven B. Hedlund",t:"Chair, President & Chief Executive Officer",since:"2024",bg:"Became CEO in 2024 and Chair after Christopher Mapes retired. Also sits on Graco's board.",conf:"high"},
-  CFO:null, COO:null, CSO:null,
-  note:"CFO and wider C-suite NOT YET VERIFIED — Lincoln Electric's leadership page blocked automated reading. Confirm from the latest proxy statement (DEF 14A) on SEC EDGAR before naming anyone.",
+  CFO:{n:"Gabriel Bruno",t:"EVP, Chief Financial Officer & Treasurer",since:"2020",bg:"A 30-year insider — joined Lincoln Electric in 1995, was Chief Human Resources Officer 2016-18 before finance. Ex-PricewaterhouseCoopers audit. Accounting degree, John Carroll University.",conf:"high"},
+  COO:null, CSO:null,
+  note:"No COO and no strategy or sustainability chief. Unusually long-tenured leadership on both seats — Bruno has been at the company since 1995 — so an outside idea has to earn its way in on evidence, not novelty. His stint as CHRO before CFO is worth knowing: the skilled-welder shortage is a labour problem he has personally owned.",
   others:[]},
 
  midd:{ src:"https://middlebycorporation.gcs-web.com/corporate-governance/management",
@@ -785,8 +788,9 @@ const CSUITE = {
 
  ftv:{ src:"https://investors.fortive.com/",
   CEO:{n:"Olumide Soroye",t:"President & Chief Executive Officer",since:"30 Jun 2025",bg:"Took over the day the Ralliant separation completed. Still relatively new — building his own agenda.",conf:"high"},
-  CFO:null, COO:null, CSO:null,
-  note:"Fortive completed the Ralliant spin-off on 30 June 2025 and Olumide Soroye became CEO the same day. A newly-separated company with a newish CEO is unusually open to outside ideas. CFO not yet verified — confirm from the latest 10-K before naming.",
+  CFO:{n:"Mark Okerstrom",t:"Chief Financial Officer",since:"24 Mar 2025",bg:"An unusual hire for an industrial: 13+ years at Expedia Group, where he was CFO for six years and then CEO. Later President & COO of Convoy. Harvard MBA, UBC law degree. A CFO who has run a software business end-to-end.",conf:"high"},
+  COO:null, CSO:null,
+  note:"Fortive completed the Ralliant spin-off on 30 June 2025 and Olumide Soroye became CEO the same day. Both top seats changed inside four months. Okerstrom in particular is worth the effort — a former internet-company CEO sitting as CFO of an industrial will understand a software venture thesis faster than almost anyone else on this list.",
   others:[]},
 
  ayi:{ src:"https://investors.acuityinc.com/corporate-governance/management",
@@ -807,14 +811,15 @@ const CSUITE = {
 
  nvt:{ src:"https://www.nvent.com/en-us/about-nvent/executive-management",
   CEO:{n:"Beth Wozniak",t:"Chair & Chief Executive Officer",since:"2018",bg:"Led nVent since the Pentair separation; heavy exposure to data-centre cooling demand.",conf:"high"},
-  CFO:{n:"Sara Zawoyski",t:"EVP & Chief Financial Officer",since:"2021",bg:"Consistently reported as CFO across sources — confirm on the leadership page before naming in writing.",conf:"med"},
+  CFO:{n:"Gary Corona",t:"EVP & Chief Financial Officer",since:"31 Mar 2025",bg:"Joined from Medtronic, where he was SVP Corporate Finance. 25+ years, much of it at General Mills working on margin expansion. An outside CFO in his second year.",conf:"high"},
   COO:null, CSO:null,
-  note:"nVent's own leadership page blocked automated reading, so this is one to spot-check by hand. Mellinda Devese was appointed EVP & Chief Supply Chain Officer in 2026 — new supply-chain leadership during a demand surge is a live opening.",
-  others:[{n:"Mellinda Devese",t:"EVP & Chief Supply Chain Officer (2026)",w:"New in seat during a data-centre-driven demand surge."}]},
+  note:"Do not address Sara Zawoyski as CFO — she held that seat from 2019 but moved to President of Systems Protection on 31 March 2025, when Gary Corona took over as CFO. Several third-party databases still list her as CFO, which is exactly the kind of error that kills a cold email. Mellinda Devese joined as EVP & Chief Supply Chain Officer in 2026 — new supply-chain leadership during a data-centre demand surge is a live opening.",
+  others:[{n:"Sara Zawoyski",t:"President, Systems Protection (since Mar 2025)",w:"Former CFO, now running a business unit. Knows the numbers AND owns a P&L — a strong internal champion if the pitch fits Systems Protection."},
+          {n:"Mellinda Devese",t:"EVP & Chief Supply Chain Officer (2026)",w:"New in seat during a data-centre-driven demand surge."}]},
 
  mas:{ src:"https://investor.masco.com/",
   CEO:{n:"Jonathon Nudi",t:"President & Chief Executive Officer",since:"7 Jul 2025",bg:"Outside hire from General Mills, where he was Group President (Pet, International, Foodservice). 30 years in consumer packaged goods, not building products. Penn State; Kellogg MBA. Joined Masco's board in 2023.",conf:"high"},
-  CFO:{n:"Rick Westenberg",t:"VP, Chief Financial Officer & Treasurer",since:"",bg:"Continuity through the CEO transition.",conf:"med"},
+  CFO:{n:"Richard 'Rick' Westenberg",t:"VP & Chief Financial Officer",since:"2023",bg:"In post since 2023, so he predates the new CEO — continuity through the transition and the person who knows what the last plan promised.",conf:"high"},
   COO:null, CSO:null,
   note:"A CEO who came from consumer packaged goods into building products, in post since July 2025, is still importing ideas from outside the sector — unusually open to an outside-in pitch.",
   others:[]},
@@ -1140,7 +1145,7 @@ function renderCSuite(c){
     h += '</div></div>';
   }
   h += '<div class="liexplain"><b>How the LinkedIn buttons work:</b> each one opens a LinkedIn people search for that person at that company. Because you are logged in, LinkedIn itself shows you the connection degree and any shared connections &mdash; the warm-intro path &mdash; on the results page. Nothing is scraped and no profile URL is guessed, so there is no Terms-of-Service risk. For shared connections across the whole UpLabs team rather than just your own network, that needs Sales Navigator Advanced (TeamLink).</div>';
-  if(cs.src) h += '<div class="srcline">Source: <a href="'+cs.src+'" target="_blank" rel="noopener">company leadership / investor-relations page</a> &middot; checked 5 Sept 2026</div>';
+  if(cs.src) h += '<div class="srcline">Source: <a href="'+cs.src+'" target="_blank" rel="noopener">company leadership / investor-relations page</a> &middot; checked 12 Sept 2026</div>';
   h += '</div>';
   return h;
 }

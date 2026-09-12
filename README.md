@@ -4,8 +4,7 @@ Twenty US industrial companies ($2B–$10B revenue). For each one: the problem t
 have publicly admitted, the company UpLabs could build to solve it, who to talk to,
 and when they will be in a room.
 
-**Live site:** enable GitHub Pages (Settings → Pages → Source: GitHub Actions) and it
-publishes here on every push to `main`.
+**Live site:** https://41shaanOS.github.io/uplabs-bd-dashboard/ — republishes automatically on every push to `main`.
 
 ---
 
@@ -48,9 +47,13 @@ Every executive name carries one. They are not decoration.
 - **check it** — consistent across secondary sources but not yet seen on a primary page
 - **unverified** — a lead, not a fact. Do not put this name in an email without checking.
 
-Three CFO seats are deliberately empty rather than guessed: Regal Rexnord,
-Lincoln Electric and Fortive. Their pages blocked automated reading. Confirm from
-the latest DEF 14A on SEC EDGAR before naming anyone.
+As of 12 Sept 2026 every CEO and CFO seat on the list is filled and verified —
+nothing is marked "check it" or "unverified" any more.
+
+One correction worth knowing about, because third-party databases still get it
+wrong: **nVent's CFO is Gary Corona, not Sara Zawoyski.** She held the seat from
+2019 but moved to President of Systems Protection on 31 March 2025. Addressing her
+as CFO is exactly the kind of error that kills a cold email.
 
 ## Leadership changes currently tracked
 
@@ -68,6 +71,8 @@ window there is.
 - **Fortive** — Olumide Soroye CEO since the Ralliant separation, June 2025.
 - **Middleby** — new CFO Brittany Cerwin; food-processing separation under way.
 - **Acuity** — Ruth Gratzke named President of Acuity Brands Lighting, August 2026.
+- **nVent** — Gary Corona became CFO March 2025, from Medtronic; Sara Zawoyski moved to President, Systems Protection.
+- **Fortive** — Mark Okerstrom became CFO March 2025. Former Expedia CFO *and* CEO — the most software-fluent finance chief on this list.
 
 ## How it updates
 
