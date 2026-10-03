@@ -1,6 +1,6 @@
 # UpLabs BD Intelligence Dashboard
 
-Twenty US industrial companies ($2B–$10B revenue). For each one: the problem they
+US industrial companies ($2B–$10B revenue) — twenty at launch, more added on request. For each one: the problem they
 have publicly admitted, the company UpLabs could build to solve it, who to talk to,
 and when they will be in a room.
 
@@ -91,6 +91,18 @@ principle holds either way: candidate hits land in an issue for review, they nev
 write themselves into the dashboard. Search results throw false positives, and a
 dashboard you can't trust is worse than one that's a week out of date.
 
+## Adding companies — automatic
+
+The **+ Add** button on the site emails a request (subject
+`BD dashboard — add company request: <Company>`). A scheduled Claude agent checks
+for those emails twice a day, researches each company to the same standard as the
+existing entries, adds it, runs `scripts/check.mjs`, and pushes to `main` — which
+republishes the site. Processed emails get the Gmail label `BD Dashboard/Added`;
+anything ambiguous gets `BD Dashboard/Needs review` and is left alone.
+
+The agent's full instructions are in [`ADD_COMPANY.md`](ADD_COMPANY.md). To change
+how it researches or writes, edit that file — the next run picks it up.
+
 ## Editing
 
 Everything is one file, `index.html`. The data sits in named arrays near the top
@@ -102,7 +114,7 @@ of the `<script>` block:
 - `COMPANY_LIST` — the 86-company quick list behind the "+ Add" button
 - `REGION_OF` / `REGION_NOTE` — location grouping
 
-Adding a company means one entry in `DATA` and one in `CSUITE` under the same id.
+Adding a company by hand means one entry each in `DATA`, `CSUITE`, `FIN` and `ALT` under the same id, with the name matching `COMPANY_LIST`. Run `node scripts/check.mjs` before pushing — the deploy runs it too and refuses to publish if it fails.
 
 ## Open questions for Sid
 

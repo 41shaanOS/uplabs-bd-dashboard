@@ -1475,11 +1475,11 @@ function doSubmit(prompt, name){
   // Path 3: hosted website (no Claude behind the page) — email the owner
   function fallbackUI(){
     const claudeUrl='https://claude.ai/new?q='+encodeURIComponent(prompt);
-    const mail='mailto:'+OWNER_EMAIL+'?subject='+encodeURIComponent('BD dashboard — add company request')+'&body='+encodeURIComponent(prompt);
+    const mail='mailto:'+OWNER_EMAIL+'?subject='+encodeURIComponent('BD dashboard — add company request: '+String(name||'').trim())+'&body='+encodeURIComponent(prompt);
     try{ navigator.clipboard.writeText(prompt); }catch(e){}
     status.innerHTML='<div class="status-ok">'
       +'<a href="'+mail+'" class="gobtn" style="display:inline-block;text-decoration:none;margin-bottom:8px">Send request to the dashboard team &rarr;</a>'
-      +'<br>One click \u2014 the request is pre-written and also copied to your clipboard. The company appears on this site after the next publish. '
+      +'<br>One click \u2014 the request is pre-written and also copied to your clipboard. Just hit send: the company is researched and added to this site automatically, usually within the day. '
       +'<a href="'+claudeUrl+'" target="_blank" rel="noopener" style="color:var(--acc);font-weight:700">Prefer to run the research yourself in Claude? &rarr;</a></div>';
   }
 }
