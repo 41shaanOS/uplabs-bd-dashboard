@@ -29,8 +29,12 @@ workflow republishes the site within a couple of minutes.
 Gmail search:
 
 ```
-subject:"add company request" -label:"BD Dashboard/Added" -label:"BD Dashboard/Needs review" newer_than:60d
+subject:"add company request" -label:Label_3 -label:Label_4 newer_than:60d
 ```
+
+The Gmail tools take label **IDs**: `Label_3` = `BD Dashboard/Added`,
+`Label_4` = `BD Dashboard/Needs review`. If those IDs ever stop matching, look
+them up with the list-labels tool.
 
 For each thread, read it and pull out the company name. If nothing matches,
 end the run: report "No pending requests" and stop. Do not push anything.
