@@ -661,10 +661,30 @@ const DATA = [
   people:[
     {n:"Lynn Bamford", t:"Chair & CEO", w:"Owns the defense-electronics R&D bet; needs the software layer to win programs."},
     {n:"Chris Farkas", t:"VP & CFO", w:"Capital gate; record-margin discipline means the venture must show its own economics."}]
+},
+{ id:"aos", name:"A.O. Smith", sector:"Water Technology", rev:"$3.8B", hq:"Milwaukee, WI", leadChange:true,
+  tagline:"North America's water-heater leader — 80–85% of its sales are replacements it can't see coming.",
+  field:"A.O. Smith makes the water heaters and boilers in a huge share of North American homes and commercial buildings — water heaters under the A.O. Smith name and Lochinvar boilers — plus water-treatment products and, since January 2026, Leonard Valve (thermostatic mixing and digital valves). It sells mostly through plumbing wholesalers, retailers and the contractors who install the units. Revenue is about $3.8B. The company is reshaping itself: in October 2026 it agreed to sell 81% of its China business to CPE (closing expected 1H 2027), after which North America becomes ~94% of sales. CEO Steve Shafer (ex-3M, McKinsey) took over in July 2025 and became Chairman in July 2026; CFO Carrie Anderson arrived from Campbell's in July 2026.",
+  problem:"Their core market is a replacement market they can't predict: management says <b>replacement makes up 80–85% of sales</b>, yet Q3 2026 water-heater sales fell 1% on lower residential volumes and 'soft replacement demand', and the US residential industry is expected down low single digits for 2026. Costs are moving the wrong way at the same time — steel and freight each up ~15% this year, cutting $18M from North America earnings in Q3 alone — so they're pushing a price increase of up to 9.5% in December and admit Q4 margins will be squeezed because price lags cost. Water treatment growth guidance was cut to 3–4% on consumer-channel weakness. The CEO has named 'connectivity' and 'digital' only as future opportunities: the installed base is enormous, but when each unit will fail is invisible to them.",
+  evidence:[
+    {src:"Q3 2026 results release &middot; Oct 29, 2026", q:"Sales flat at $940.5M; North America margin down to 23.6% from 24.2% on lower residential water-heater volumes and higher steel and freight costs; China sales down 17% in local currency; China stake sale to CPE agreed; Shafer cites 'persistent inflationary pressures, softer residential water heater demand in North America'.", why:"The admitted problem in the CEO's own words — volume softness in the core product while costs rise.", link:"https://investor.aosmith.com/news-releases/news-release-details/o-smith-reports-third-quarter-2026-results"},
+    {src:"Q3 2026 earnings call &middot; Oct 29, 2026", q:"Shafer: the replacement market is 'seeing a little bit of pressure'; management is 'preparing for a continued kind of muted environment' into 2027. Anderson: steel and freight each expected up ~15% in 2026; Q4 'will come under some amount of pressure' as price lags cost; water-treatment growth cut to 3–4% on 'continued weakness in the consumer channel'.", why:"A muted 2027 outlook means growth has to come from something new — and both new leaders are on record.", link:"https://www.fool.com/earnings/call-transcripts/2026/10/29/a-o-smith-aos-q3-2026-earnings-call-transcript/"},
+    {src:"Q3 2026 investor slides &middot; Oct 2026", q:"Replacement demand accounts for 80–85% of sales; post-China, North America rises to 94% of sales; strategy priorities include building a new water-management growth platform.", why:"Their revenue is driven by failures they can't see — and they've said they want a new water-management platform.", link:"https://www.investing.com/news/company-news/ao-smith-q3-2026-slides-china-exit-to-boost-margins-sharpen-focus-93CH-4984730"}],
+  ventureName:"Replacement-demand intelligence for the installed water-heater base",
+  venture:"A startup that predicts when installed water heaters and boilers will fail — combining unit age, water quality, usage and (where available) connected-device data — and turns that into product: planned replacement offers before the emergency, demand forecasts by region for production and pricing, and lead flow for the contractors and wholesalers who install the units. A.O. Smith is customer #1 because replacement is 80–85% of its sales and it has the largest installed base to learn from; next customers are the plumbing distributors, home warranty firms and utilities running efficiency programs. It fits the 'water-management growth platform' management has already named as a priority.",
+  approach:[
+    "Lead with the number they published: '80–85% of your revenue comes from failures you can't see coming — let's build the company that sees them.'",
+    "Steve Shafer (CEO since Jul 2025, Chairman since Jul 2026) is a former 3M chief strategy officer and McKinsey consultant — pitch it as a strategy move that builds the water-management platform he has listed as a priority.",
+    "Carrie Anderson (CFO since 1 Jul 2026) is new and is setting her first full-year plan. China sale proceeds go mainly to buybacks, so frame the venture as capital-light and paying for itself through better demand planning in a year she expects margins to be squeezed.",
+    "Timing: the December 2026 price increase and the Q4 results (China recast, segment review) are the next stories. Reach out before 2027 planning is locked."],
+  people:[
+    {n:"Stephen M. Shafer", t:"Chairman, President & CEO", w:"Ex-3M strategy chief; has named 'connectivity' and 'digital' as future opportunities — the obvious sponsor."},
+    {n:"Carrie L. Anderson", t:"EVP & CFO (Jul 2026)", w:"New CFO in a margin squeeze; controls the money and needs demand visibility."},
+    {n:"Chris Howe", t:"SVP & Chief Digital Information Officer", w:"Owns the digital stack that any connected/predictive product would plug into."}]
 }
 ];
 
-const SECTOR_ORDER = ["Industrial Automation","Heavy Machinery","Chemicals","Paint & Coatings","Fertilizer & Ag Inputs","Diversified Industrial","Diversified / Electrical","Aerospace & Defense"];
+const SECTOR_ORDER = ["Industrial Automation","Heavy Machinery","Chemicals","Paint & Coatings","Fertilizer & Ag Inputs","Diversified Industrial","Diversified / Electrical","Aerospace & Defense","Water Technology"];
 const SECTOR_BLURBS = {
   "Industrial Automation":"The companies that automate everyone else's factories.",
   "Heavy Machinery":"Trucks, mowers, compressors, kitchens — hardware giants hunting for their software layer.",
@@ -673,7 +693,8 @@ const SECTOR_BLURBS = {
   "Fertilizer & Ag Inputs":"Commodity + consumer ag — both mid-leadership-change, both data-hungry.",
   "Diversified Industrial":"Software-heavy portfolios that buy and build constantly.",
   "Diversified / Electrical":"The grid + AI data-center boom — the fastest demand growth on the list.",
-  "Aerospace & Defense":"Capacity-starved precision manufacturing and defense-grade AI."
+  "Aerospace & Defense":"Capacity-starved precision manufacturing and defense-grade AI.",
+  "Water Technology":"Water heating, treatment and flow — replacement-driven hardware whose data layer hasn't been built yet."
 };
 
 /* ============================================================
@@ -843,7 +864,16 @@ const CSUITE = {
   COO:{n:"Kevin M. Rayment",t:"EVP & Chief Operating Officer",since:"2021",bg:"A real COO — one of only two on this entire list. Has run integration of multiple acquisitions.",conf:"high"},
   CSO:{n:"John C. Watts",t:"EVP & Chief Growth Officer",since:"",bg:"'Chief Growth Officer' rather than Chief Strategy Officer — owns where the company expands next.",conf:"high"},
   note:"The most conventionally complete C-suite on the list: a real COO and a growth/strategy chief alongside CEO and CFO. If you want a company where the four roles Sid asked for actually all exist, this is it.",
-  others:[]}
+  others:[]},
+
+ aos:{ src:"https://www.aosmith.com/about-us/leadership.html",
+  CEO:{n:"Stephen M. Shafer",t:"Chairman, President and Chief Executive Officer",since:"Jul 2025 (Chairman Jul 2026)",bg:"Was President & COO from March 2024 to July 2025. Before that he spent years at 3M, where he was president of 3M Greater China, SVP & chief strategy officer, and head of Automotive & Aerospace Solutions. Earlier at McKinsey, Ford and NASA. Became Chairman when Kevin Wheeler retired on 1 Jul 2026.",conf:"high"},
+  CFO:{n:"Carrie L. Anderson",t:"Executive Vice President and Chief Financial Officer",since:"1 Jul 2026",bg:"NEW CFO. Joined from The Campbell's Company, where she was EVP & CFO. Before that she was CFO at Integra LifeSciences and held finance roles at Dover and Delphi. Replaced Chuck Lauber, who retired after 26+ years.",conf:"high"},
+  COO:null, CSO:null,
+  note:"No COO since Shafer became CEO; Samuel M. Carver (SVP, Global Operations) runs operations. No Chief Strategy Officer: strategy sits with James F. Stern (EVP, Corporate Development, Strategy and Secretary) and Cristen E. O'Meara (VP, Corporate Strategy). Sustainability sits with Joshua C. Greene (VP, Global Government Affairs and Sustainability). Both CEO and CFO are new in the last 18 months.",
+  others:[{n:"James F. Stern",t:"EVP, Corporate Development, Strategy and Secretary",w:"Runs M&A (Leonard Valve, the China sale) — the natural door for a co-built venture."},
+          {n:"Chris Howe",t:"SVP & Chief Digital Information Officer",w:"Owns digital and IT — any connected or predictive product depends on him."},
+          {n:"Stephen D. O'Brien",t:"SVP, President & GM, North America Water Heating",w:"Owns the business where replacement demand is soft."}]}
 };
 
 
@@ -949,7 +979,8 @@ const FIN = {
  cf:{m:"$17.9B",e:"$4.07B"}, ir:{m:"$34.2B",e:"$1.97B"}, rrx:{m:"$11.9B",e:"$1.21B"}, leco:{m:"$15.2B",e:"$0.87B"},
  midd:{m:"$6.3B",e:"$0.67B"}, emn:{m:"$8.4B",e:"$1.27B"}, alb:{m:"$14.8B",e:"$0.89B"}, esi:{m:"$11.3B",e:"$0.70B (FY26 guide)"},
  ftv:{m:"$18.4B",e:"$1.18B"}, ayi:{m:"$10.6B",e:"$0.83B"}, hubb:{m:"$27.3B",e:"$1.49B"}, nvt:{m:"$26.9B",e:"$1.06B"},
- mas:{m:"$15.2B",e:"$1.34B"}, smg:{m:"$4.1B",e:"$0.52B"}, hwm:{m:"$113.6B",e:"$2.80B"}, cw:{m:"$26.4B",e:"$0.81B"}
+ mas:{m:"$15.2B",e:"$1.34B"}, smg:{m:"$4.1B",e:"$0.52B"}, hwm:{m:"$113.6B",e:"$2.80B"}, cw:{m:"$26.4B",e:"$0.81B"},
+ aos:{m:"$8.3B",e:"$0.78B"}
 };
 /* Higher-traction alternate contacts: lower-seniority people who feel the problem daily, reply faster, and champion upward. */
 const ALT = {
@@ -972,7 +1003,8 @@ const ALT = {
  mas:"Hiranaga's new marketing organization (being hired now \u2014 relationships form fastest with new arrivals), Behr's digital/DTC team, and Home Depot channel managers.",
  smg:"Baxter's former technology/ops organization (his lieutenants now run it and speak his language), e-commerce leadership, and supply-chain planning heads.",
  hwm:"Plant managers and manufacturing-engineering directors at engine-products sites, the AI/yield project teams Plant referenced, and site continuous-improvement leads.",
- cw:"Defense-electronics division GMs and chief engineers, BD leads who assemble program-pursuit teams, and embedded-computing product-line managers."
+ cw:"Defense-electronics division GMs and chief engineers, BD leads who assemble program-pursuit teams, and embedded-computing product-line managers.",
+ aos:"North America Water Heating product and pricing managers (they deal with the replacement swings and the December price increase), Chris Howe's digital team, Lochinvar and Leonard Valve product leads working on connected and digital valves, and the corporate-strategy team under Cristen O'Meara."
 };
 function esc(s){ return s; }
 /* ---- pipeline status + filters ---- */
